@@ -162,8 +162,9 @@ def write_stockData_to_csv():
     except:
         sys.stdout.write("유효하지 않은 입력입니다. \n")
         return -1
-    
+
     return get_stockData_using_stockCode(stockCode)
+
 
 def get_stockData_using_stockCode(stockCode):
     print("Loading stock data from KRX...")
@@ -181,14 +182,14 @@ def get_stockData_using_stockCode(stockCode):
 
     stockData['pattern1'] = None
     for i in range(len(stockData)):
-        stockData['pattern1'].values[i]  = labellingD0(stockData.iloc[i])
+        stockData['pattern1'].values[i] = labellingD0(stockData.iloc[i])
 
     stockData['pattern2'] = None
-    for i in range(1,len(stockData)):
+    for i in range(1, len(stockData)):
         stockData['pattern2'].values[i] = labellingD1(stockData.iloc[i-1:i+1])
 
     stockData['pattern3'] = None
-    for i in range(2,len(stockData)):
+    for i in range(2, len(stockData)):
         stockData['pattern3'].values[i] = labellingD2(stockData.iloc[i-2:i+1])
 
     # stockData.to_csv(f"resources/{stockData.columns.name}.csv")
