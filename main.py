@@ -1,7 +1,8 @@
 # module import 영역
-from modules.pattern_labelling import load_stock_with_labels
+from modules.stockpred_apriori import stockpred_apriori
 
 
 # main function 영역
 if __name__ == "__main__":
-    load_stock_with_labels()
+    stockpred_apriori(1360,0.05,20,2)
+    stockpred_apriori(1360,0.05,20,3)

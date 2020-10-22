@@ -149,16 +149,25 @@ def labellingD2(d210):
     return res + labellingD0(d210.iloc[2])
 
 
-def load_stock_with_labels():
+def write_stockData_to_csv():
+    '''
+    패터닝된 pd.DataFrame을 리턴하면서 csv 파일로 저장
+    '''
     sys.stdout.write("[Labelling Test]\n불러올 기업명을 입력하시오: ")
     comName = sys.stdin.readline().rstrip()
-    stockCode = pd.read_csv("stockcode.csv")
+    stockCode = pd.read_csv("resources/stockcode.csv")
 
     try:
         stockCode = str(int(stockCode[stockCode['회사명'] == comName]['종목코드']))
     except:
         sys.stdout.write("유효하지 않은 입력입니다. \n")
         return -1
+    
+    return get_stockData_using_stockCode(stockCode)
+
+def get_stockData_using_stockCode(stockCode):
+    print("Loading stock data from KRX...")
+    stockCode = str(stockCode)
     stockCode = "0"*(6-len(stockCode)) + stockCode
 
     # today에 현재 시간을 불러옵니다.
@@ -166,8 +175,9 @@ def load_stock_with_labels():
     today = str(today.year)+str(today.month)+str(today.day)
 
     stockData = stock.get_market_ohlcv_by_date("20120101", today, stockCode)
+    comName = stockData.columns.name
     stockData.columns = pd.Index(
-        ["open", "high", "low", "close", "volume"], name=stockData.columns.name)
+        ["open", "high", "low", "close", "volume"], name=comName)
 
     stockData['pattern1'] = None
     for i in range(len(stockData)):
@@ -181,6 +191,6 @@ def load_stock_with_labels():
     for i in range(2,len(stockData)):
         stockData['pattern3'].values[i] = labellingD2(stockData.iloc[i-2:i+1])
 
-    stockData.to_csv(f"{stockData.columns.name}.csv")
+    # stockData.to_csv(f"resources/{stockData.columns.name}.csv")
+    print(f"{comName}({stockCode})의 주식 데이터를 가져오는 데에 성공했습니다 (기간: 20120101~{today})")
     return stockData
-
