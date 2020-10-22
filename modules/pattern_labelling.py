@@ -1,7 +1,7 @@
 from pykrx import stock
 import sys
 import pandas as pd
-
+import FinanceDataReader as fdr
 
 def labellingD0(d0) -> str:
     '''
@@ -148,6 +148,30 @@ def labellingD2(d210):
 
     return res + labellingD0(d210.iloc[2])
 
+# 나스닥지수 라벨링
+def labellingNASDAQ(d0):
+    
+    nsq_p = d0['close']
+    if (nsq_p.iloc[i] - nsq_p.iloc[i+1])/nsq_p.iloc[i] > 0.3:
+        if (nsq_p.iloc[i] - nsq_p.iloc[i+1])/nsq_p.iloc[i] < 1.0:
+            return 'U01'
+        if (nsq_p.iloc[i] - nsq_p.iloc[i+1])/nsq_p.iloc[i] < 1.7:
+            return 'U02'
+        if (nsq_p.iloc[i] - nsq_p.iloc[i+1])/nsq_p.iloc[i] < 2.8:
+            return 'U03'
+        else : 
+            return 'U04'
+    elif (nsq_p.iloc[i] - nsq_p.iloc[i+1])/nsq_p.iloc[i] < -2.8:
+        return 'D04'
+        if (nsq_p.iloc[i] - nsq_p.iloc[i+1])/nsq_p.iloc[i] > -1.7:
+            return 'D03'
+        if (nsq_p.iloc[i] - nsq_p.iloc[i+1])/nsq_p.iloc[i] > -1.0:
+            return 'D02'
+        if (nsq_p.iloc[i] - nsq_p.iloc[i+1])/nsq_p.iloc[i] > -0.3:
+            return 'D01'
+    else : 
+        return 'T00'
+
 
 def load_stock_with_labels():
     sys.stdout.write("[Labelling Test]\n불러올 기업명을 입력하시오: ")
@@ -164,10 +188,12 @@ def load_stock_with_labels():
     # today에 현재 시간을 불러옵니다.
     today = pd.Timestamp.now()
     today = str(today.year)+str(today.month)+str(today.day)
+    today1 = str(today.year)+'-'+str(today.month)+'-'+str(today.day)
 
     stockData = stock.get_market_ohlcv_by_date("20120101", today, stockCode)
     stockData.columns = pd.Index(
         ["open", "high", "low", "close", "volume"], name=stockData.columns.name)
+    nq = fdr.DataReader('IXIC', '2012-01-01', today1)
 
     stockData['pattern1'] = None
     for i in range(len(stockData)):
@@ -180,6 +206,10 @@ def load_stock_with_labels():
     stockData['pattern3'] = None
     for i in range(2,len(stockData)):
         stockData['pattern3'].values[i] = labellingD2(stockData.iloc[i-2:i+1])
+        
+    stockData['nasdaq'] = None
+    for i in range(1,len(stockData)):
+        stockData['nasdaq'].values[i] = labellingNASDAQ(nq.iloc[i-1:i+1])
 
     stockData.to_csv(f"{stockData.columns.name}.csv")
     return stockData
