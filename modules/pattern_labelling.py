@@ -151,25 +151,24 @@ def labellingD2(d210):
 # 나스닥지수 라벨링
 def labellingNASDAQ(d0):
     i = 0
-    nsq_p = d0['close']
-    if (nsq_p.iloc[i] - nsq_p.iloc[i+1])/nsq_p.iloc[i] > 0.3:
-        if (nsq_p.iloc[i] - nsq_p.iloc[i+1])/nsq_p.iloc[i] < 1.0:
+    nsq_p = d0['change']*1000
+    if nsq_p.iloc[i] > 0.3:
+        if nsq_p.iloc[i]< 1.0:
             return 'U01'
-        if (nsq_p.iloc[i] - nsq_p.iloc[i+1])/nsq_p.iloc[i] < 1.7:
+        if nsq_p.iloc[i] < 1.7:
             return 'U02'
-        if (nsq_p.iloc[i] - nsq_p.iloc[i+1])/nsq_p.iloc[i] < 2.8:
+        if nsq_p.iloc[i] < 2.8:
             return 'U03'
         else : 
             return 'U04'
-    elif (nsq_p.iloc[i] - nsq_p.iloc[i+1])/nsq_p.iloc[i] > -0.3:
-        if (nsq_p.iloc[i] - nsq_p.iloc[i+1])/nsq_p.iloc[i] > -1.0:
-            return 'D01'
-        if (nsq_p.iloc[i] - nsq_p.iloc[i+1])/nsq_p.iloc[i] > -1.7:
-            return 'D02'
-        if (nsq_p.iloc[i] - nsq_p.iloc[i+1])/nsq_p.iloc[i] > -2.8:
-            return 'D03'
+    elif nsq_p.iloc[i]< -2.8:
         return 'D04'
-                
+        if nsq_p.iloc[i] > -1.7:
+            return 'D03'
+        if nsq_p.iloc[i] > -1.0:
+            return 'D02'
+        if nsq_p.iloc[i] > -0.3:
+            return 'D01'
     else : 
         return 'T00'
 
@@ -212,7 +211,7 @@ def load_stock_with_labels():
         
     stockData['nasdaq'] = None
     for i in range(1,len(stockData)):
-        stockData['nasdaq'].values[i] = labellingNASDAQ(nq.iloc[i-1:i+1])
+        stockData['nasdaq'].values[i] = labellingNASDAQ(nq.iloc[i])
 
     stockData.to_csv(f"{stockData.columns.name}.csv")
     return stockData
