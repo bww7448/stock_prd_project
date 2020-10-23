@@ -166,14 +166,17 @@ def write_stockData_to_csv():
     return get_stockData_using_stockCode(stockCode)
 
 
-def get_stockData_using_stockCode(stockCode):
+def get_stockData_using_stockCode(stockCode, lastDate=None):
     print("Loading stock data from KRX...")
     stockCode = str(stockCode)
     stockCode = "0"*(6-len(stockCode)) + stockCode
 
-    # today에 현재 시간을 불러옵니다.
-    today = pd.Timestamp.now()
-    today = str(today.year)+str(today.month)+str(today.day)
+    if lastDate == None:
+        # today에 현재 시간을 불러옵니다.
+        today = pd.Timestamp.now()
+        today = str(today.year)+str(today.month)+str(today.day)
+    else:
+        today = str(lastDate)
 
     stockData = stock.get_market_ohlcv_by_date("20120101", today, stockCode)
     comName = stockData.columns.name

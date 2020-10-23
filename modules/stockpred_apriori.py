@@ -5,7 +5,7 @@ from random import sample
 from modules.pattern_labelling import get_stockData_using_stockCode
 
 
-def stockpred_apriori(stock_code=None, weight=0.05, min_P_score=50, N_items=3):
+def stockpred_apriori(stock_code=None, weight=0.05, min_P_score=50, N_items=3, last_date=None):
     '''
     n-items serial association rule analysis를 통해 다음 주식 패턴을 예측합니다.
 
@@ -14,6 +14,7 @@ def stockpred_apriori(stock_code=None, weight=0.05, min_P_score=50, N_items=3):
     - weight        시간에 따른 가중치를 입력합니다. 미입력 시 0.05로 적용됩니다.
     - min_P_score   입력된 값(0 ~ 100) 미만의 P_score를 보이는 결과는 보여주지 않습니다. 미입력 시 50으로 적용됩니다.
     - N_items       연관 규칙 시 장바구니에 묶을 item 수를 정합니다. 미입력 시 3개씩 묶습니다.
+    - last_date      예측하고 싶은 마지막 시점을 "YYYYMMDD" 형식으로 입력합니다. 미입력 시 오늘 날짜로 입력됩니다.
     '''
     if stock_code == None:
         stock_list = pd.read_csv('resources/stockcode.csv')
@@ -29,7 +30,7 @@ def stockpred_apriori(stock_code=None, weight=0.05, min_P_score=50, N_items=3):
         raise TypeError("N_items에는 2 이상 9 이하의 정수가 입력되어야 합니다.")
 
     for stock_code in stock_sample:
-        stockData = get_stockData_using_stockCode(stock_code)
+        stockData = get_stockData_using_stockCode(stock_code, lastDate=last_date)
 
         bong_list = []
         for i in range(0, len(stockData) - N_items):
