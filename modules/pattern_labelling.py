@@ -3,6 +3,11 @@ import sys
 import pandas as pd
 
 
+# 전역
+nsq_p = pd.read_csv("resources/nasdaq.csv")[['date','nasdaq']]
+nsq_p['date'] = pd.to_datetime(nsq_p['date'])
+
+
 def labellingD0(d0) -> str:
     '''
     D0 시점의 각 봉에 대한 라벨링 25가지
@@ -148,38 +153,14 @@ def labellingD2(d210):
 
     return res + labellingD0(d210.iloc[2])
 
-
-def write_stockData_to_csv():
-    '''
-    패터닝된 pd.DataFrame을 리턴하면서 csv 파일로 저장
-    '''
-    sys.stdout.write("[Labelling Test]\n불러올 기업명을 입력하시오: ")
-    comName = sys.stdin.readline().rstrip()
-    stockCode = pd.read_csv("resources/stockcode.csv")
-
-    try:
-        stockCode = str(int(stockCode[stockCode['회사명'] == comName]['종목코드']))
-    except:
-        sys.stdout.write("유효하지 않은 입력입니다. \n")
-        return -1
-
-    return get_stockData_using_stockCode(stockCode)
-
-
-def get_stockData_using_stockCode(stockCode, lastDate=None):
+def get_stockData_using_stockCode(stockCode, today):
     print("Loading stock data from KRX...")
     stockCode = str(stockCode)
     stockCode = "0"*(6-len(stockCode)) + stockCode
 
-    if lastDate == None:
-        # today에 현재 시간을 불러옵니다.
-        today = pd.Timestamp.now()
-        today = str(today.year)+str(today.month)+str(today.day)
-    else:
-        today = str(lastDate)
-
     stockData = stock.get_market_ohlcv_by_date("20120101", today, stockCode)
     comName = stockData.columns.name
+    stockData.index.name = 'date'
     stockData.columns = pd.Index(
         ["open", "high", "low", "close", "volume"], name=comName)
 
@@ -195,6 +176,37 @@ def get_stockData_using_stockCode(stockCode, lastDate=None):
     for i in range(2, len(stockData)):
         stockData['pattern3'].values[i] = labellingD2(stockData.iloc[i-2:i+1])
 
+    # NASDAQ labelling
+    stockData = stockData.reset_index()
+    stockData = pd.merge(stockData, nsq_p, on='date', how='left')
+    nan_list = stockData[stockData['nasdaq'].isnull()].index
+    stockData['nasdaq'].fillna(-1)
+    for i in nan_list:
+        pointer = i
+        while (pointer>0):
+            pointer -= 1
+            temp = stockData['nasdaq'].values[pointer]
+            if temp != -1:
+                stockData['nasdaq'].values[i] = temp
+                break
+
     # stockData.to_csv(f"resources/{stockData.columns.name}.csv")
     print(f"{comName}({stockCode})의 주식 데이터를 가져오는 데에 성공했습니다 (기간: 20120101~{today})")
     return stockData
+
+def write_stockData_to_csv(last_date):
+    '''
+    패터닝된 pd.DataFrame을 리턴하면서 csv 파일로 저장
+    '''
+    sys.stdout.write("[Labelling Test]\n불러올 기업명을 입력하시오: ")
+    comName = sys.stdin.readline().rstrip()
+    stockCode = pd.read_csv("resources/stockcode.csv")
+
+    try:
+        stockCode = str(int(stockCode[stockCode['회사명'] == comName]['종목코드']))
+    except:
+        sys.stdout.write("유효하지 않은 입력입니다. \n")
+        return -1
+
+    target = get_stockData_using_stockCode(stockCode, last_date)
+    target.to_csv(f"resources/{comName}.csv")
