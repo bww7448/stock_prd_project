@@ -153,16 +153,17 @@ def labellingD2(d210):
 
     return res + labellingD0(d210.iloc[2])
 
-def get_stockData_using_stockCode(stockCode, today):
+def get_stockData_using_stockCode(stockCode):
     print("Loading stock data from KRX...")
-    stockCode = str(stockCode)
-    stockCode = "0"*(6-len(stockCode)) + stockCode
+    #stockCode = str(stockCode)
+    #stockCode = "0"*(6-len(stockCode)) + stockCode
 
-    stockData = stock.get_market_ohlcv_by_date("20120101", today, stockCode)
-    comName = stockData.columns.name
-    stockData.index.name = 'date'
-    stockData.columns = pd.Index(
-        ["open", "high", "low", "close", "volume"], name=comName)
+    #stockData = stock.get_market_ohlcv_by_date("20120101", today, stockCode)
+    #comName = stockData.columns.name
+    #stockData.index.name = 'date'
+
+    stockData = pd.read_csv('resources/ohlcv/{}.csv'.format(stockCode), parse_dates=['날짜'])
+    stockData.columns = pd.Index(["date", "open", "high", "low", "close", "volume"])
 
     stockData['pattern1'] = None
     for i in range(len(stockData)):
@@ -177,7 +178,7 @@ def get_stockData_using_stockCode(stockCode, today):
         stockData['pattern3'].values[i] = labellingD2(stockData.iloc[i-2:i+1])
 
     # NASDAQ labelling
-    stockData = stockData.reset_index()
+    #stockData = stockData.reset_index()
     stockData = pd.merge(stockData, nsq_p, on='date', how='left')
     nan_list = stockData[stockData['nasdaq'].isnull()].index
     stockData['nasdaq'].fillna(-1)
@@ -191,7 +192,7 @@ def get_stockData_using_stockCode(stockCode, today):
                 break
 
     # stockData.to_csv(f"resources/{stockData.columns.name}.csv")
-    print(f"{comName}({stockCode})의 주식 데이터를 가져오는 데에 성공했습니다 (기간: 20120101~{today})")
+    print("주식 데이터를 가져오는 데에 성공했습니다")
     return stockData
 
 def write_stockData_to_csv(last_date):
@@ -208,5 +209,5 @@ def write_stockData_to_csv(last_date):
         sys.stdout.write("유효하지 않은 입력입니다. \n")
         return -1
 
-    target = get_stockData_using_stockCode(stockCode, last_date)
+    target = get_stockData_using_stockCode(stockCode)
     target.to_csv(f"resources/{comName}.csv")
