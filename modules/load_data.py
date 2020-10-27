@@ -4,7 +4,6 @@ from tailer import tail
 from FinanceDataReader import DataReader
 from pykrx import stock
 from time import sleep
-import re
 
 from modules.pattern_labelling import * 
 
@@ -150,7 +149,6 @@ def update_stockData_with_labels():
     '''
     라벨링된 데이터에 직접 갱신합니다. 이거쓰세요.
     '''
-    # def update_stockData():
     stock_list = pd.read_csv("resources/stockcode.csv", dtype = {"종목코드": str, "회사명": str})
     first_df = pd.read_csv('resources/ohlcv_p1p2p3_nasdq/000020.csv', parse_dates=['date'], index_col=[0])
 
@@ -169,7 +167,8 @@ def update_stockData_with_labels():
         df_update = df_update.reset_index()
         for stock_ in df_update.iloc:
             stock_code = stock_['종목코드']
-            update_target = pd.read_csv(f'resources/ohlcv_p1p2p3_nasdq/{stock_code}.csv', parse_dates=['date'],
+            filename = f'resources/ohlcv_p1p2p3_nasdq/{stock_code}.csv'
+            update_target = pd.read_csv(filename, parse_dates=['date'],
                                         index_col=[0])
             update_target = update_target.append({'date':pd_date,'open':stock_['시가'],'high':stock_['고가'],'low':stock_['저가'],'close':stock_['종가'],'volume':stock_['거래량']}, 
                                         ignore_index=True)
@@ -181,3 +180,13 @@ def update_stockData_with_labels():
                 update_target['nasdaq'].values[last_idx] = nsq_p[nsq_p['date']==pd_date].values[0][1]
             except IndexError:
                 update_target['nasdaq'].values[last_idx] = update_target['nasdaq'].iloc[last_idx-1]
+            
+            # modify file
+            temp = update_target.values[last_idx-1]
+            temp[0] = temp[0].date()
+            for i in range(6):
+                temp[i] = str(temp[i])
+            temp = "".join([temp[i//2] if i%2==0 else "," for i in range(19)])
+            temp += '\n'
+            with open(filename,'a',encoding='UTF-8') as f:
+                f.write(temp)
