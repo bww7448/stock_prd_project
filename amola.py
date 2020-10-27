@@ -1,7 +1,7 @@
 import pandas as pd
 # from sklearn.metrics import confusion_matrix, classification_report
 # from modules.stockpred_apriori import stockpred_apriori
-from modules.pattern_labelling import get_stockData_using_stockCode
+from modules.load_data import get_stockData_using_stockCode
 
 
 #sample_df = stockpred_apriori(stock_code=None, weight=0.05, min_P_score=20, N_items=3)

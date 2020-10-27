@@ -2,7 +2,7 @@ import pandas as pd
 from mlxtend.preprocessing import TransactionEncoder
 from mlxtend.frequent_patterns import apriori
 from random import sample
-from modules.pattern_labelling import get_stockData_using_stockCode
+from modules.load_data import get_stockData_using_stockCode
 
 # U01, U02, U03, U04, D01, D02, D03, D04, T01
 NASDAQ_weight = [
