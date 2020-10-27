@@ -109,6 +109,9 @@ def get_stockData_using_stockCode(stockCode, wr=False):
 
 
 def update_stockData():
+    '''
+    사용하지 마시오
+    '''
     # def update_stockData():
     stock_list = pd.read_csv("resources/stockcode.csv", dtype = {"종목코드": str, "회사명": str})
 
@@ -141,3 +144,40 @@ def update_stockData():
                 new_stock = stock.get_market_ohlcv_by_date("20120101", pd_date, stock_code)
                 new_stock.to_csv(filename, encoding='UTF-8')
                 sleep(1)
+
+
+def update_stockData_with_labels():
+    '''
+    라벨링된 데이터에 직접 갱신합니다. 이거쓰세요.
+    '''
+    # def update_stockData():
+    stock_list = pd.read_csv("resources/stockcode.csv", dtype = {"종목코드": str, "회사명": str})
+    first_df = pd.read_csv('resources/ohlcv_p1p2p3_nasdq/000020.csv', parse_dates=['date'], index_col=[0])
+
+    pd_last_date = first_df['date'].iloc[-1]
+    pd_today = pd.to_datetime(pd.Timestamp.now().date())
+    # 데이터를 갱신할 날짜 범위
+    pd_last_p1 = pd_last_date + pd.Timedelta(days=1)
+    pd_drange = pd.date_range(pd_last_p1, pd_today)
+    if pd_last_p1 == pd_today:
+        pd_drange = []
+
+    for pd_date in pd_drange:
+        df_update = stock.get_market_ohlcv_by_ticker(pd_date)
+        if not len(df_update):  # 장이 열리지 않은 날이면 skip
+            continue
+        df_update = df_update.reset_index()
+        for stock_ in df_update.iloc:
+            stock_code = stock_['종목코드']
+            update_target = pd.read_csv(f'resources/ohlcv_p1p2p3_nasdq/{stock_code}.csv', parse_dates=['date'],
+                                        index_col=[0])
+            update_target = update_target.append({'date':pd_date,'open':stock_['시가'],'high':stock_['고가'],'low':stock_['저가'],'close':stock_['종가'],'volume':stock_['거래량']}, 
+                                        ignore_index=True)
+            last_idx = len(update_target)-1
+            update_target['pattern1'].values[last_idx] = labellingD0(update_target.iloc[last_idx])
+            update_target['pattern2'].values[last_idx] = labellingD1(update_target.iloc[last_idx-1:last_idx+1])
+            update_target['pattern3'].values[last_idx] = labellingD2(update_target.iloc[last_idx-2:last_idx+1])
+            try:
+                update_target['nasdaq'].values[last_idx] = nsq_p[nsq_p['date']==pd_date].values[0][1]
+            except IndexError:
+                update_target['nasdaq'].values[last_idx] = update_target['nasdaq'].iloc[last_idx-1]
