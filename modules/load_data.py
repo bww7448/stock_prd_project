@@ -3,6 +3,7 @@ from os.path import isfile
 from tailer import tail
 from FinanceDataReader import DataReader
 from pykrx import stock
+from time import sleep
 
 from modules.pattern_labelling import * 
 
@@ -101,7 +102,7 @@ def get_stockData_using_stockCode(stockCode, wr=False):
                 break
 
     if wr:
-        stockData.to_csv(f"resources/ohlcv_p1p2p3_nasdq/{stockData.columns.name}.csv")
+        stockData.to_csv(f"resources/ohlcv_p1p2p3_nasdq/{stockCode}.csv")
 
     return stockData
 
@@ -118,7 +119,10 @@ def update_stockData():
     pd_today = pd.to_datetime(pd_today.date())
 
     # 데이터를 갱신할 날짜 범위
-    pd_drange = pd.date_range(pd_last_date + pd.Timedelta(days=1), pd_today)
+    pd_last_p1 = pd_last_date + pd.Timedelta(days=1)
+    pd_drange = pd.date_range(pd_last_p1, pd_today)
+    if pd_last_p1 == pd_today:
+        pd_drange = []
 
     for pd_date in pd_drange:
         df_update = stock.get_market_ohlcv_by_ticker(pd_date)
@@ -133,5 +137,7 @@ def update_stockData():
                 with open(filename,'a',encoding='UTF-8') as f:
                     f.write(f"{str_date},{stock_['시가']},{stock_['고가']},{stock_['저가']},{stock_['종가']},{stock_['거래량']}\n")
             else:
-                new_stock = stock.get_market_ohlcv_by_date("20120101", pd_today, stock_code)
+                new_stock = stock.get_market_ohlcv_by_date("20120101", pd_date, stock_code)
                 new_stock.to_csv(filename, encoding='UTF-8')
+                sleep(1)
+            print(stock_code)
