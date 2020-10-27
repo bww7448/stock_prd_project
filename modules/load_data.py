@@ -4,9 +4,12 @@ from tailer import tail
 from FinanceDataReader import DataReader
 from pykrx import stock
 from time import sleep
+import re
 
 from modules.pattern_labelling import * 
 
+nsq_p = pd.read_csv("resources/nasdaq.csv")[['date','nasdaq']]
+nsq_p['date'] = pd.to_datetime(nsq_p['date'])
 
 # 나스닥지수 한국시간으로 맞추기
 def call_nasdaq():
@@ -85,8 +88,6 @@ def get_stockData_using_stockCode(stockCode, wr=False):
     for i in range(2, len(stockData)):
         stockData['pattern3'].values[i] = labellingD2(stockData.iloc[i-2:i+1])
 
-    nsq_p = pd.read_csv("resources/nasdaq.csv")[['date','nasdaq']]
-    nsq_p['date'] = pd.to_datetime(nsq_p['date'])
     stockData = pd.merge(stockData, nsq_p, on='date', how='left')
     nan_list = stockData[stockData['nasdaq'].isnull()].index
     stockData['nasdaq'].fillna(-1)
@@ -140,4 +141,3 @@ def update_stockData():
                 new_stock = stock.get_market_ohlcv_by_date("20120101", pd_date, stock_code)
                 new_stock.to_csv(filename, encoding='UTF-8')
                 sleep(1)
-            print(stock_code)
