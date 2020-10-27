@@ -1,7 +1,11 @@
 import pandas as pd
-import FinanceDataReader as fdr
+from os.path import isfile
+from tailer import tail
+from FinanceDataReader import DataReader
+from pykrx import stock
+
 from modules.pattern_labelling import * 
-import sys
+
 
 # 나스닥지수 한국시간으로 맞추기
 def call_nasdaq():
@@ -11,7 +15,7 @@ def call_nasdaq():
     '''
     today = pd.Timestamp.now()
     today = str(today.year)+"-"+str(today.month)+"-"+str(today.day)
-    nq = fdr.DataReader('IXIC', '2012-01-01', today)
+    nq = DataReader('IXIC', '2012-01-01', today)
     nq = nq.reset_index()
     nq.columns = pd.Index(["date", "close", "open", "high",
                            "low", "volume", "change"], name=nq.columns.name)
@@ -67,6 +71,7 @@ def get_stockData_using_stockCode(stockCode, wr=False):
     stockData.columns = pd.Index(
         ["date", "open", "high", "low", "close", "volume"])
 
+
     stockData['pattern1'] = None
     for i in range(len(stockData)):
         stockData['pattern1'].values[i] = labellingD0(stockData.iloc[i])
@@ -79,6 +84,8 @@ def get_stockData_using_stockCode(stockCode, wr=False):
     for i in range(2, len(stockData)):
         stockData['pattern3'].values[i] = labellingD2(stockData.iloc[i-2:i+1])
 
+    nsq_p = pd.read_csv("resources/nasdaq.csv")[['date','nasdaq']]
+    nsq_p['date'] = pd.to_datetime(nsq_p['date'])
     stockData = pd.merge(stockData, nsq_p, on='date', how='left')
     nan_list = stockData[stockData['nasdaq'].isnull()].index
     stockData['nasdaq'].fillna(-1)
@@ -99,24 +106,32 @@ def get_stockData_using_stockCode(stockCode, wr=False):
     return stockData
 
 
-def write_stockData_to_csv():
-    '''
-    테스트용, 기업 입력해서 데이터 임시로 불러오기
-    '''
-    sys.stdout.write("[Labelling Test]\n불러올 기업명을 입력하시오: ")
-    comName = sys.stdin.readline().rstrip()
-    stockCode = pd.read_csv("resources/stockcode.csv")
-    try:
-        stockCode = str(int(stockCode[stockCode['회사명'] == comName]['종목코드']))
-    except:
-        sys.stdout.write("유효하지 않은 입력입니다. \n")
-        return -1
-
-    target = get_stockData_using_stockCode(stockCode)
-    target.to_csv(f"resources/{comName}.csv")
-
 def update_stockData():
-    '''
-    주식 데이터를 생성하거나 최신 버전으로 갱신합니다.
-    '''
-    pass
+    # def update_stockData():
+    stock_list = pd.read_csv("resources/stockcode.csv", dtype = {"종목코드": str, "회사명": str})
+
+    # pd_가 붙은 것은 pd.timestamp, 붙지 않은 것은 'YYYY-MM-DD' 형식의 str
+    pd_last_date = tail(open('resources/ohlcv/000020.csv'), 1)
+    pd_last_date = pd_last_date[1][:10]
+    pd_last_date = pd.to_datetime(pd_last_date)
+    pd_today = pd.Timestamp.now()
+    pd_today = pd.to_datetime(pd_today.date())
+
+    # 데이터를 갱신할 날짜 범위
+    pd_drange = pd.date_range(pd_last_date + pd.Timedelta(days=1), pd_today)
+
+    for pd_date in pd_drange:
+        df_update = stock.get_market_ohlcv_by_ticker(pd_date)
+        if not len(df_update):  # 장이 열리지 않은 날이면 skip
+            continue
+        df_update = df_update.reset_index()
+        for stock_ in df_update.iloc:
+            stock_code = stock_['종목코드']
+            filename= f'resources/ohlcv/{stock_code}.csv'
+            str_date = str(pd_date.date())
+            if (isfile(filename)):
+                with open(filename,'a',encoding='UTF-8') as f:
+                    f.write(f"{str_date},{stock_['시가']},{stock_['고가']},{stock_['저가']},{stock_['종가']},{stock_['거래량']}\n")
+            else:
+                new_stock = stock.get_market_ohlcv_by_date("20120101", pd_today, stock_code)
+                new_stock.to_csv(filename, encoding='UTF-8')

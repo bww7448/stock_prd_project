@@ -1,11 +1,5 @@
-from pykrx import stock
 import sys
 import pandas as pd
-
-
-# 전역
-nsq_p = pd.read_csv("resources/nasdaq.csv")[['date','nasdaq']]
-nsq_p['date'] = pd.to_datetime(nsq_p['date'])
 
 
 def labellingD0(d0) -> str:
