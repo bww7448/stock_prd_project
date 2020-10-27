@@ -13,7 +13,7 @@ stock_list2 = pd.read_csv('resources/stockcode.csv',
                           dtype={"종목코드": str, "회사명": str})
 r = 0
 for i in stock_list2["종목코드"]:
-    r = r+1
+    r += 1
     df = get_stockData_using_stockCode(i)
     df.to_csv("resources/ohlcv_p1p2p3_nasdq/{}.csv".format(i))
     print("{}저장 완료({}번째)".format(i, r))

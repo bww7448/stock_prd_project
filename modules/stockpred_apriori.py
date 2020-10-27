@@ -58,6 +58,8 @@ def stockpred_apriori(stock_code=None, weight=0.05, min_P_score=50, N_items=3) :
     himdlda = 1
     for stock_code in stock_sample:
         #stockData = get_stockData_using_stockCode(stock_code)
+        stock_code = str(stock_code)
+        stock_code = "0"*(6-len(stock_code)) + stock_code
         stockData = pd.read_csv('resources/ohlcv_p1p2p3_nasdq/{}.csv'.format(stock_code), parse_dates=['date'], index_col=[0])
         # sssssa = stockData.volume[-1]
         # sssssa_val = sssssa.values[0]
