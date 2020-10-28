@@ -14,7 +14,6 @@ stock_list = pd.read_csv("resources/stockcode.csv", dtype = {"종목코드": str
 def call_nasdaq():
     '''
     나스닥 지수 데이터를 최신으로 불러옵니다.
-    @ TODO: 파일이 존재할 경우, 없는 날짜만 불러와서 붙이기
     '''
     today = pd.Timestamp.now()
     today = str(today.year)+"-"+str(today.month)+"-"+str(today.day)
@@ -64,37 +63,39 @@ def call_nasdaq():
     nsq_data.to_csv("resources/nasdaq.csv")
 
 
-
-
-
 def update_stockData_with_labels():
     '''
-    라벨링된 데이터에 최신 주식 데이터를 업데이트합니다.
+    라벨링된 데이터에 최신 주식 데이터를 업데이트합니다. 최소 2분이 소요됩니다.
     '''
+    # 가장 마지막 주식 데이터의 갱신 상태를 확인해서 갱신할 날짜의 범위를 지정합니다.
     first_df = pd.read_csv('resources/ohlcv_p1p2p3_nasdq/950200.csv', parse_dates=['date'], index_col=[0])
-
-    pd_last_date = first_df['date'].iloc[-1]
+    pd_last_date = first_df['date'].iloc[-1]    # 데이터의 마지막 행을 갱신 범위에 포함시킵니다.
     pd_today = pd.to_datetime(pd.Timestamp.now().date())
-    pd_drange = pd.date_range(pd_last_date, pd_today)   # 데이터를 갱신할 날짜 범위
+    pd_drange = pd.date_range(pd_last_date, pd_today)
 
     for pd_date in pd_drange:
         df_update = stock.get_market_ohlcv_by_ticker(pd_date)
         if not len(df_update):  # 장이 열리지 않은 날이면 skip
             continue
         df_update = df_update.reset_index()
+
         for stock_code in stock_list['종목코드'].iloc:
-            try:
+
+            try:    # pykrx로 불러온 데이터에서 해당 주식 데이터 불러오기
                 stock_ = df_update[df_update['종목코드']==stock_code].values[0]
             except IndexError:
-                stock_ = [stock_code, 0,0,0,0,0,0]
+                raise Exception(f"{stock_code} 종목의 데이터가 정상적으로 로드되지 않았습니다.\n상장 폐지된 종목이라면 stockcode.csv를 갱신하세요.\n그렇지 않다면, 시간이 지난 후 다시 시도하세요.")
+
             filename = f'resources/ohlcv_p1p2p3_nasdq/{stock_code}.csv'
-            try:
+            try:    # 갱신 대상 데이터 불러오기
                 update_target = pd.read_csv(filename, parse_dates=['date'], index_col=[0])
             except FileNotFoundError:
                 break
+
             if update_target['date'].values[-1] > pd_date:
-                continue    # 이전에 오류나서 이미 일부가 업데이트된 상태인 경우, 넘김
+                continue    # 이전에 오류나서 이미 일부가 업데이트된 상태인 경우, skip
             elif update_target['date'].values[-1] == pd_date:
+                # 데이터의 마지막 행을 갱신합니다.
                 update_target['open'].values[-1] = stock_[2]
                 update_target['high'].values[-1] = stock_[3]
                 update_target['low'].values[-1] = stock_[4]
@@ -102,10 +103,12 @@ def update_stockData_with_labels():
                 update_target['volume'].values[-1] = stock_[6]
                 flag = 0
             else:
+                # 데이터를 추가합니다. 이 경우 pandas의 to_csv 대신 io를 이용합니다. 
                 update_target = update_target.append({'date':pd_date,'open':stock_[2],'high':stock_[3],'low':stock_[4],'close':stock_[5],'volume':stock_[6]}, 
                                     ignore_index=True)
                 flag = 1
 
+            # 갱신 혹은 추가된 데이터에 대해 새로 라벨링 작업을 진행합니다.
             last_idx = len(update_target)-1
             update_target['pattern1'].values[last_idx] = labellingD0(update_target.iloc[last_idx])
             update_target['pattern2'].values[last_idx] = labellingD1(update_target.iloc[last_idx-1:last_idx+1])
@@ -113,10 +116,9 @@ def update_stockData_with_labels():
             try:
                 update_target['nasdaq'].values[last_idx] = nsq_p[nsq_p['date']==pd_date].values[0][1]
             except IndexError:
-                raise Exception("call_nasdaq()부터 실행하세요.")
+                raise Exception("nasdaq.csv 파일의 갱신이 필요합니다. call_nasdaq()부터 실행하세요.")
 
             if flag:
-                # modify file
                 temp = update_target.values[last_idx]
                 temp[0] = temp[0].date()
                 for i in range(6):
@@ -129,8 +131,10 @@ def update_stockData_with_labels():
                 update_target.to_csv(filename)
 
 
-
-# NOT RECOMMENDED
+############################################################################################################
+# 
+# 아래의 기능은 데이터를 전체적으로 복구할 필요가 있을 경우에만 이용합니다. 복구에는 2시간 이상 소요되니 신중하게 사용하세요.
+# 
 
 def update_stockData():
     '''
