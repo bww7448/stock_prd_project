@@ -111,7 +111,7 @@ def update_stockData_with_labels():
             try:
                 update_target['nasdaq'].values[last_idx] = nsq_p[nsq_p['date']==pd_date].values[0][1]
             except IndexError:
-                update_target['nasdaq'].values[last_idx] = update_target['nasdaq'].iloc[last_idx-1]
+                raise Exception("call_nasdaq()부터 실행하세요.")
 
             update_target.to_csv(filename)
 
