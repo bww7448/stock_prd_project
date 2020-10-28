@@ -90,17 +90,14 @@ def update_stockData_with_labels():
             except FileNotFoundError:
                 break
             if update_target['date'].values[-1] > pd_date:
-                print("skip")
                 continue
             elif update_target['date'].values[-1] == pd_date:
-                print("renew")
                 update_target['open'].values[-1] = stock_['시가']
                 update_target['high'].values[-1] = stock_['고가']
                 update_target['low'].values[-1] = stock_['저가']
                 update_target['close'].values[-1] = stock_['종가']
                 update_target['volume'].values[-1] = stock_['거래량']
             else:
-                print("add")
                 update_target = update_target.append({'date':pd_date,'open':stock_['시가'],'high':stock_['고가'],'low':stock_['저가'],'close':stock_['종가'],'volume':stock_['거래량']}, 
                                     ignore_index=True)
 
