@@ -1,5 +1,11 @@
+from pykrx import stock
 import sys
 import pandas as pd
+
+
+# 전역
+nsq_p = pd.read_csv("resources/nasdaq.csv")[['date','nasdaq']]
+nsq_p['date'] = pd.to_datetime(nsq_p['date'])
 
 
 def labellingD0(d0) -> str:
@@ -147,24 +153,61 @@ def labellingD2(d210):
 
     return res + labellingD0(d210.iloc[2])
 
-def labellingNASDAQ(change):
-    if change > 0.0003:
-        if change< 0.0010:
-            return 'U01'
-        if change < 0.0017:
-            return 'U02'
-        if change < 0.0028:
-            return 'U03'
-        else : 
-            return 'U04'
-    elif change < -0.0028:
-        if change > -0.0017:
-            return 'D03'
-        if change > -0.0010:
-            return 'D02'
-        if change > -0.0003:
-            return 'D01'
-        return 'D04'
-    else : 
-        return 'T01'
+def get_stockData_using_stockCode(stockCode):
+    print("Loading stock data from KRX...")
+    #stockCode = str(stockCode)
+    #stockCode = "0"*(6-len(stockCode)) + stockCode
 
+    #stockData = stock.get_market_ohlcv_by_date("20120101", today, stockCode)
+    #comName = stockData.columns.name
+    #stockData.index.name = 'date'
+
+    stockData = pd.read_csv('resources/ohlcv/{}.csv'.format(stockCode), parse_dates=['날짜'])
+    stockData.columns = pd.Index(["date", "open", "high", "low", "close", "volume"])
+
+    stockData['pattern1'] = None
+    for i in range(len(stockData)):
+        stockData['pattern1'].values[i] = labellingD0(stockData.iloc[i])
+
+    stockData['pattern2'] = None
+    for i in range(1, len(stockData)):
+        stockData['pattern2'].values[i] = labellingD1(stockData.iloc[i-1:i+1])
+
+    stockData['pattern3'] = None
+    for i in range(2, len(stockData)):
+        stockData['pattern3'].values[i] = labellingD2(stockData.iloc[i-2:i+1])
+
+    # NASDAQ labelling
+    #stockData = stockData.reset_index()
+    stockData = pd.merge(stockData, nsq_p, on='date', how='left')
+    nan_list = stockData[stockData['nasdaq'].isnull()].index
+    stockData['nasdaq'].fillna(-1)
+    for i in nan_list:
+        pointer = i
+        while (pointer>0):
+            pointer -= 1
+            temp = stockData['nasdaq'].values[pointer]
+            if temp != -1:
+                stockData['nasdaq'].values[i] = temp
+                break
+
+    # stockData.to_csv(f"resources/{stockData.columns.name}.csv")
+    print("주식 데이터를 가져오는 데에 성공했습니다")
+    return stockData
+
+def write_stockData_to_csv(last_date):
+    '''
+    패터닝된 pd.DataFrame을 리턴하면서 csv 파일로 저장
+    '''
+    sys.stdout.write("[Labelling Test]\n불러올 기업명을 입력하시오: ")
+    comName = sys.stdin.readline().rstrip()
+    stockCode = pd.read_csv("resources/stockcode.csv")
+
+    try:
+        stockCode = str(int(stockCode[stockCode['회사명'] == comName]['종목코드']))
+    except:
+        sys.stdout.write("유효하지 않은 입력입니다. \n")
+        return -1
+
+    target = get_stockData_using_stockCode(stockCode)
+    target.to_csv(f"resources/{comName}.csv")
