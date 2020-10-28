@@ -7,8 +7,8 @@ from time import sleep
 
 from modules.pattern_labelling import * 
 
-nsq_p = pd.read_csv("resources/nasdaq.csv")[['date','nasdaq']]
-nsq_p['date'] = pd.to_datetime(nsq_p['date'])
+nsq_p = pd.read_csv("resources/nasdaq.csv", parse_dates=['date'])[['date','nasdaq']]
+stock_list = pd.read_csv("resources/stockcode.csv", dtype = {"종목코드": str, "회사명": str})
 
 # 나스닥지수 한국시간으로 맞추기
 def call_nasdaq():
@@ -64,16 +64,114 @@ def call_nasdaq():
     nsq_data.to_csv("resources/nasdaq.csv")
 
 
+
+
+
+def update_stockData_with_labels():
+    '''
+    라벨링된 데이터에 최신 주식 데이터를 업데이트합니다.
+    '''
+    first_df = pd.read_csv('resources/ohlcv_p1p2p3_nasdq/950200.csv', parse_dates=['date'], index_col=[0])
+
+    pd_last_date = first_df['date'].iloc[-1]
+    pd_today = pd.to_datetime(pd.Timestamp.now().date())
+    pd_drange = pd.date_range(pd_last_date, pd_today)   # 데이터를 갱신할 날짜 범위
+
+    for pd_date in pd_drange:
+        df_update = stock.get_market_ohlcv_by_ticker(pd_date)
+        if not len(df_update):  # 장이 열리지 않은 날이면 skip
+            continue
+        df_update = df_update.reset_index()
+        for stock_ in df_update.iloc:
+            stock_code = stock_['종목코드']
+            filename = f'temp/{stock_code}.csv'
+            try:
+                update_target = pd.read_csv(filename, parse_dates=['date'], index_col=[0])
+            except FileNotFoundError:
+                break
+            if update_target['date'].values[-1] > pd_date:
+                print("skip")
+                continue
+            elif update_target['date'].values[-1] == pd_date:
+                print("renew")
+                update_target['open'].values[-1] = stock_['시가']
+                update_target['high'].values[-1] = stock_['고가']
+                update_target['low'].values[-1] = stock_['저가']
+                update_target['close'].values[-1] = stock_['종가']
+                update_target['volume'].values[-1] = stock_['거래량']
+            else:
+                print("add")
+                update_target = update_target.append({'date':pd_date,'open':stock_['시가'],'high':stock_['고가'],'low':stock_['저가'],'close':stock_['종가'],'volume':stock_['거래량']}, 
+                                    ignore_index=True)
+
+            last_idx = len(update_target)-1
+            update_target['pattern1'].values[last_idx] = labellingD0(update_target.iloc[last_idx])
+            update_target['pattern2'].values[last_idx] = labellingD1(update_target.iloc[last_idx-1:last_idx+1])
+            update_target['pattern3'].values[last_idx] = labellingD2(update_target.iloc[last_idx-2:last_idx+1])
+            try:
+                update_target['nasdaq'].values[last_idx] = nsq_p[nsq_p['date']==pd_date].values[0][1]
+            except IndexError:
+                update_target['nasdaq'].values[last_idx] = update_target['nasdaq'].iloc[last_idx-1]
+
+            update_target.to_csv(filename)
+
+            # # modify file
+            # temp = update_target.values[last_idx-1]
+            # temp[0] = temp[0].date()
+            # for i in range(6):
+            #     temp[i] = str(temp[i])
+            # temp = "".join([temp[i//2] if i%2==0 else "," for i in range(19)])
+            # temp += '\n'
+            # with open(filename,'a',encoding='UTF-8') as f:
+            #     f.write(temp)
+
+
+
+# NOT RECOMMENDED
+
+def update_stockData():
+    '''
+    라벨링이 되지 않은 상태로 업데이트되므로, 대신 update_stockData_with_labels()를 사용하세요.
+    '''
+    # def update_stockData():
+    
+
+    # pd_가 붙은 것은 pd.timestamp, 붙지 않은 것은 'YYYY-MM-DD' 형식의 str
+    pd_last_date = tail(open('resources/ohlcv/950200.csv'), 1)
+    pd_last_date = pd_last_date[1][:10]
+    pd_last_date = pd.to_datetime(pd_last_date)
+    pd_today = pd.Timestamp.now()
+    pd_today = pd.to_datetime(pd_today.date())
+
+    # 데이터를 갱신할 날짜 범위
+    pd_last_p1 = pd_last_date + pd.Timedelta(days=1)
+    pd_drange = pd.date_range(pd_last_p1, pd_today)
+
+    for pd_date in pd_drange:
+        df_update = stock.get_market_ohlcv_by_ticker(pd_date)
+        if not len(df_update):  # 장이 열리지 않은 날이면 skip
+            continue
+        df_update = df_update.reset_index()
+        for stock_ in df_update.iloc:
+            stock_code = stock_['종목코드']
+            filename= f'resources/ohlcv/{stock_code}.csv'
+            str_date = str(pd_date.date())
+            if (isfile(filename)):
+                with open(filename,'a',encoding='UTF-8') as f:
+                    f.write(f"{str_date},{stock_['시가']},{stock_['고가']},{stock_['저가']},{stock_['종가']},{stock_['거래량']}\n")
+            else:
+                new_stock = stock.get_market_ohlcv_by_date("20120101", pd_date, stock_code)
+                new_stock.to_csv(filename, encoding='UTF-8')
+                sleep(1)
+
 def get_stockData_using_stockCode(stockCode, wr=False):
     '''
-    주식 데이터을 라벨링해서 불러옵니다.\n
-    wr=True 시, 라벨링된 데이터를 저장합니다.
+    라벨링되지 않은 데이터의 모든 행에 라벨링 작업을 수행하므로, 대신 update_stockData_with_labels()를 사용하세요.
     '''
     stockData = pd.read_csv(
         'resources/ohlcv/{}.csv'.format(stockCode), parse_dates=['날짜'])
     stockData.columns = pd.Index(
         ["date", "open", "high", "low", "close", "volume"])
-
 
     stockData['pattern1'] = None
     for i in range(len(stockData)):
@@ -105,88 +203,3 @@ def get_stockData_using_stockCode(stockCode, wr=False):
         stockData.to_csv(f"resources/ohlcv_p1p2p3_nasdq/{stockCode}.csv")
 
     return stockData
-
-
-def update_stockData():
-    '''
-    사용하지 마시오
-    '''
-    # def update_stockData():
-    stock_list = pd.read_csv("resources/stockcode.csv", dtype = {"종목코드": str, "회사명": str})
-
-    # pd_가 붙은 것은 pd.timestamp, 붙지 않은 것은 'YYYY-MM-DD' 형식의 str
-    pd_last_date = tail(open('resources/ohlcv/000020.csv'), 1)
-    pd_last_date = pd_last_date[1][:10]
-    pd_last_date = pd.to_datetime(pd_last_date)
-    pd_today = pd.Timestamp.now()
-    pd_today = pd.to_datetime(pd_today.date())
-
-    # 데이터를 갱신할 날짜 범위
-    pd_last_p1 = pd_last_date + pd.Timedelta(days=1)
-    pd_drange = pd.date_range(pd_last_p1, pd_today)
-    if pd_last_p1 == pd_today:
-        pd_drange = []
-
-    for pd_date in pd_drange:
-        df_update = stock.get_market_ohlcv_by_ticker(pd_date)
-        if not len(df_update):  # 장이 열리지 않은 날이면 skip
-            continue
-        df_update = df_update.reset_index()
-        for stock_ in df_update.iloc:
-            stock_code = stock_['종목코드']
-            filename= f'resources/ohlcv/{stock_code}.csv'
-            str_date = str(pd_date.date())
-            if (isfile(filename)):
-                with open(filename,'a',encoding='UTF-8') as f:
-                    f.write(f"{str_date},{stock_['시가']},{stock_['고가']},{stock_['저가']},{stock_['종가']},{stock_['거래량']}\n")
-            else:
-                new_stock = stock.get_market_ohlcv_by_date("20120101", pd_date, stock_code)
-                new_stock.to_csv(filename, encoding='UTF-8')
-                sleep(1)
-
-
-def update_stockData_with_labels():
-    '''
-    라벨링된 데이터에 직접 갱신합니다. 이거쓰세요.
-    '''
-    stock_list = pd.read_csv("resources/stockcode.csv", dtype = {"종목코드": str, "회사명": str})
-    first_df = pd.read_csv('resources/ohlcv_p1p2p3_nasdq/000020.csv', parse_dates=['date'], index_col=[0])
-
-    pd_last_date = first_df['date'].iloc[-1]
-    pd_today = pd.to_datetime(pd.Timestamp.now().date())
-    # 데이터를 갱신할 날짜 범위
-    pd_last_p1 = pd_last_date + pd.Timedelta(days=1)
-    pd_drange = pd.date_range(pd_last_p1, pd_today)
-    if pd_last_p1 == pd_today:
-        pd_drange = []
-
-    for pd_date in pd_drange:
-        df_update = stock.get_market_ohlcv_by_ticker(pd_date)
-        if not len(df_update):  # 장이 열리지 않은 날이면 skip
-            continue
-        df_update = df_update.reset_index()
-        for stock_ in df_update.iloc:
-            stock_code = stock_['종목코드']
-            filename = f'resources/ohlcv_p1p2p3_nasdq/{stock_code}.csv'
-            update_target = pd.read_csv(filename, parse_dates=['date'],
-                                        index_col=[0])
-            update_target = update_target.append({'date':pd_date,'open':stock_['시가'],'high':stock_['고가'],'low':stock_['저가'],'close':stock_['종가'],'volume':stock_['거래량']}, 
-                                        ignore_index=True)
-            last_idx = len(update_target)-1
-            update_target['pattern1'].values[last_idx] = labellingD0(update_target.iloc[last_idx])
-            update_target['pattern2'].values[last_idx] = labellingD1(update_target.iloc[last_idx-1:last_idx+1])
-            update_target['pattern3'].values[last_idx] = labellingD2(update_target.iloc[last_idx-2:last_idx+1])
-            try:
-                update_target['nasdaq'].values[last_idx] = nsq_p[nsq_p['date']==pd_date].values[0][1]
-            except IndexError:
-                update_target['nasdaq'].values[last_idx] = update_target['nasdaq'].iloc[last_idx-1]
-            
-            # modify file
-            temp = update_target.values[last_idx-1]
-            temp[0] = temp[0].date()
-            for i in range(6):
-                temp[i] = str(temp[i])
-            temp = "".join([temp[i//2] if i%2==0 else "," for i in range(19)])
-            temp += '\n'
-            with open(filename,'a',encoding='UTF-8') as f:
-                f.write(temp)
