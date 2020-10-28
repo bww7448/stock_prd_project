@@ -84,7 +84,9 @@ def update_stockData_with_labels():
             try:    # pykrx로 불러온 데이터에서 해당 주식 데이터 불러오기
                 stock_ = df_update[df_update['종목코드']==stock_code].values[0]
             except IndexError:
-                raise Exception(f"{stock_code} 종목의 데이터가 정상적으로 로드되지 않았습니다.\n상장 폐지된 종목이라면 stockcode.csv를 갱신하세요.\n그렇지 않다면, 시간이 지난 후 다시 시도하세요.")
+                if len(df_update):
+                    raise Exception(f"{stock_code} 종목의 데이터가 정상적으로 로드되지 않았습니다.\n상장 폐지된 종목이라면 stockcode.csv를 갱신하세요.\n그렇지 않다면, 시간이 지난 후 다시 시도하세요.")
+                stock_ = [pd_date,-1,-1,-1,-1,-1,-1]    # dummy
 
             filename = f'resources/ohlcv_p1p2p3_nasdq/{stock_code}.csv'
             try:    # 갱신 대상 데이터 불러오기
