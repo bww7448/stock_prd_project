@@ -82,24 +82,29 @@ def update_stockData_with_labels():
         if not len(df_update):  # 장이 열리지 않은 날이면 skip
             continue
         df_update = df_update.reset_index()
-        for stock_ in df_update.iloc:
-            stock_code = stock_['종목코드']
-            filename = f'temp/{stock_code}.csv'
+        for stock_code in stock_list['종목코드'].iloc:
+            try:
+                stock_ = df_update[df_update['종목코드']==stock_code].values[0]
+            except IndexError:
+                stock_ = [stock_code, 0,0,0,0,0,0]
+            filename = f'resources/ohlcv_p1p2p3_nasdq/{stock_code}.csv'
             try:
                 update_target = pd.read_csv(filename, parse_dates=['date'], index_col=[0])
             except FileNotFoundError:
                 break
             if update_target['date'].values[-1] > pd_date:
-                continue
+                continue    # 이전에 오류나서 이미 일부가 업데이트된 상태인 경우, 넘김
             elif update_target['date'].values[-1] == pd_date:
-                update_target['open'].values[-1] = stock_['시가']
-                update_target['high'].values[-1] = stock_['고가']
-                update_target['low'].values[-1] = stock_['저가']
-                update_target['close'].values[-1] = stock_['종가']
-                update_target['volume'].values[-1] = stock_['거래량']
+                update_target['open'].values[-1] = stock_[2]
+                update_target['high'].values[-1] = stock_[3]
+                update_target['low'].values[-1] = stock_[4]
+                update_target['close'].values[-1] = stock_[5]
+                update_target['volume'].values[-1] = stock_[6]
+                flag = 0
             else:
-                update_target = update_target.append({'date':pd_date,'open':stock_['시가'],'high':stock_['고가'],'low':stock_['저가'],'close':stock_['종가'],'volume':stock_['거래량']}, 
+                update_target = update_target.append({'date':pd_date,'open':stock_[2],'high':stock_[3],'low':stock_[4],'close':stock_[5],'volume':stock_[6]}, 
                                     ignore_index=True)
+                flag = 1
 
             last_idx = len(update_target)-1
             update_target['pattern1'].values[last_idx] = labellingD0(update_target.iloc[last_idx])
@@ -110,17 +115,18 @@ def update_stockData_with_labels():
             except IndexError:
                 raise Exception("call_nasdaq()부터 실행하세요.")
 
-            update_target.to_csv(filename)
-
-            # # modify file
-            # temp = update_target.values[last_idx-1]
-            # temp[0] = temp[0].date()
-            # for i in range(6):
-            #     temp[i] = str(temp[i])
-            # temp = "".join([temp[i//2] if i%2==0 else "," for i in range(19)])
-            # temp += '\n'
-            # with open(filename,'a',encoding='UTF-8') as f:
-            #     f.write(temp)
+            if flag:
+                # modify file
+                temp = update_target.values[last_idx]
+                temp[0] = temp[0].date()
+                for i in range(6):
+                    temp[i] = str(temp[i])
+                temp = str(last_idx)+","+"".join([temp[i//2] if i%2==0 else "," for i in range(19)])
+                temp += '\n'
+                with open(filename,'a',encoding='UTF-8') as f:
+                    f.write(temp)
+            else:
+                update_target.to_csv(filename)
 
 
 
@@ -130,9 +136,6 @@ def update_stockData():
     '''
     라벨링이 되지 않은 상태로 업데이트되므로, 대신 update_stockData_with_labels()를 사용하세요.
     '''
-    # def update_stockData():
-    
-
     # pd_가 붙은 것은 pd.timestamp, 붙지 않은 것은 'YYYY-MM-DD' 형식의 str
     pd_last_date = tail(open('resources/ohlcv/950200.csv'), 1)
     pd_last_date = pd_last_date[1][:10]

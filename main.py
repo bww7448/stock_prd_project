@@ -1,17 +1,17 @@
 # module import 영역
 from modules.stockpred_apriori import stockpred_apriori
 from modules.load_data import *
-
+from time import time
 
 # main function 영역
 if __name__ == "__main__":
+    startTime = time()
+
     call_nasdaq()
-    # write_stockData_to_csv()
-    # stockpred_apriori(5930, min_P_score=0)
-
-    # update_stockData()
+    update_stockData_with_labels()
     
-
+    endTime = time()
+    print("time: {}ms".format((endTime - startTime)*1000))
 
 
 '''
