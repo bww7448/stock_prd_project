@@ -148,23 +148,23 @@ def labellingD2(d210):
     return res + labellingD0(d210.iloc[2])
 
 def labellingNASDAQ(change):
-    if change > 0.0003:
-        if change< 0.0010:
+    if change > 0.003:
+        if change< 0.010:
             return 'U01'
-        if change < 0.0017:
+        if change < 0.017:
             return 'U02'
-        if change < 0.0028:
+        if change < 0.028:
             return 'U03'
         else : 
             return 'U04'
-    elif change < -0.0028:
-        if change > -0.0017:
-            return 'D03'
-        if change > -0.0010:
-            return 'D02'
-        if change > -0.0003:
-            return 'D01'
-        return 'D04'
-    else : 
+    elif change > -0.003:
         return 'T01'
+    else:
+        if change > -0.01:
+            return 'D01'
+        if change > -0.017:
+            return 'D02'
+        if change > -0.028:
+            return 'D03'
+        return 'D04'
 
