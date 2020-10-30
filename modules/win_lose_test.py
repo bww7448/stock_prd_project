@@ -33,9 +33,9 @@ def win_lose_test(zzin_df = "zzin_df_item6", first_profit = 0.05, first_loss = 0
         if buy_price * (1 + first_profit) < first_bong["high"].values[0]:
             win_lose_score["today_win"] += 1
             win_lose_score["real_profit"] += first_profit
-        elif buy_price * (1-first_loss) > first_bong["close"].values[0]:
+        elif buy_price * (1-first_loss) > first_bong["low"].values[0]:
             win_lose_score["today_lose"] += 1
-            win_lose_score["real_profit"] += ((first_bong["close"].values[0] - buy_price)/buy_price) 
+            win_lose_score["real_profit"] += -first_loss
         # elif buy_price * 1.01 < first_bong["close"].values[0] :
         #     win_lose_score["today_win"] += 1
         #     win_lose_score["real_profit"] += ((first_bong["close"].values[0] - buy_price) / buy_price )
@@ -43,9 +43,10 @@ def win_lose_test(zzin_df = "zzin_df_item6", first_profit = 0.05, first_loss = 0
             if buy_price * (1 + second_profit) < second_bong["high"].values[0] :
                 win_lose_score["tomorrow_win"] += 1
                 win_lose_score["real_profit"] += second_profit
-            elif buy_price * (1-second_loss) > second_bong["close"].values[0] :
+            elif buy_price * (1-second_loss) > second_bong["low"].values[0] :
                 win_lose_score["tomorrow_lose"] += 1
-                win_lose_score["real_profit"] += ((second_bong["close"].values[0] - buy_price)/buy_price)
+                win_lose_score["real_profit"] += -second_loss
+                #win_lose_score["real_profit"] += ((second_bong["close"].values[0] - buy_price)/buy_price)
             else :
                 if buy_price * (1 + third_profit) < third_bong["high"].values[0] :
                     win_lose_score["day2_win"] += 1
@@ -66,6 +67,6 @@ def win_lose_test(zzin_df = "zzin_df_item6", first_profit = 0.05, first_loss = 0
     win_lose_table.to_csv("resources/sample_table.csv", encoding = 'euc-kr') 
     return win_lose_table
 
-win_lose_test(zzin_df = "zzin_df_item6", first_profit = 0.05, first_loss = 0.02, second_profit = 0.03, second_loss = 0.015, third_profit = 0.01)
+win_lose_test(zzin_df = "item6_zzin_winlose", first_profit = 0.03, first_loss = 0.02, second_profit = 0.03, second_loss = 0.015, third_profit = 0.01)
 
 

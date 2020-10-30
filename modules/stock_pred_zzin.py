@@ -3,15 +3,15 @@ from random import sample
 
 # U01, U02, U03, U04, D01, D02, D03, D04, T01
 NASDAQ_weight = [
-    [30,15,5,5,8,7,5,5,20],
-    [22,23,8,8,7,6,6,5,15],
-    [10,17,23,17,7,5,5,3,13],
-    [5,5,5,30,8,7,5,5,20],
-    [8,7,5,5,30,15,5,5,20],
-    [7,6,6,5,22,23,8,8,15],
-    [7,5,5,5,10,17,23,17,13],
-    [8,7,5,5,5,5,5,30,20],
-    [15,7,7,6,15,7,7,6,30]
+    [13.98,13.07,12.36,10.79,12.57,13.45, 6.88, 3.47,13.42],
+    [13.48,14.49,13.70, 9.95,13.92,12.90, 5.62, 1.84,14.10],
+    [13.45,14.59,15.48, 9.46,15.22,12.79, 4.56, 0.30,14.15],
+    [11.63,10.88,10.28,14.28,10.46,12.07,11.03, 8.20,11.17],
+    [13.41,14.50,14.87, 9.58,15.11,12.78, 4.88, 0.78,14.09],
+    [13.41,12.54,11.86,11.37,12.06,13.92, 7.62, 4.35,12.88],
+    [10.29, 9.63, 9.10,12.64, 9.25,10.68,15.52,13.01, 9.88],
+    [ 9.80, 9.17, 8.67,12.04, 8.81,10.17,14.78,17.16, 9.41],
+    [13.62,13.85,13.09,10.24,13.31,13.06, 6.10, 2.50,14.22]
 ]
 NASDAQ_weight_dict = {"U01":0, "U02":1, "U03":2, "U04":3, "D01":4, "D02":5, "D03":6, "D04":7, "T01":8}
 
@@ -20,7 +20,7 @@ def get_NASDAQ_weight(standardL, relativeL):
     j = NASDAQ_weight_dict[relativeL]
     return NASDAQ_weight[i][j]
 
-def stockpred_apriori(stock_code=None, weight=0.05, min_P_score=50, N_items=3):
+def stockpred_apriori(stock_code=None, day_weight=0.05, min_P_score=50, N_items=3, nas_weight = 2):
     '''
     n-items serial association rule analysis를 통해 다음 주식 패턴을 예측합니다.
 
@@ -84,9 +84,9 @@ def stockpred_apriori(stock_code=None, weight=0.05, min_P_score=50, N_items=3):
             current_bong = bong_list[bong_order].copy()
             next_bong = current_bong.pop()
             if target == current_bong:
-                date_weight = bong_order//10*weight
+                date_weight = (bong_order//10)*day_weight
                 nasdaq_weight = get_NASDAQ_weight(target_nasdaq, stockData['nasdaq'][bong_order+N_items])
-                score = 1 + date_weight + 2*nasdaq_weight
+                score = 1 + date_weight + nas_weight*nasdaq_weight
                 next_bong = next_bong[2:4]
                 if "P0" == next_bong:
                     A["P0"] += score
