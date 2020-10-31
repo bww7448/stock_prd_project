@@ -31,7 +31,7 @@ def get_NASDAQ_weight(standardL, relativeL):
     j = NASDAQ_weight_dict[relativeL]
     return NASDAQ_weight[i][j]
 
-def stockpred_apriori(stock_code=None, weight=0.05, min_P_score=50, N_items=3):
+def stockpred_apriori(stock_code=None, day_weight=0.05, min_P_score=50, N_items=3, nas_weight = 2):
     '''
     n-items serial association rule analysis를 통해 다음 주식 패턴을 예측합니다.
 
@@ -95,9 +95,9 @@ def stockpred_apriori(stock_code=None, weight=0.05, min_P_score=50, N_items=3):
             current_bong = bong_list[bong_order].copy()
             next_bong = current_bong.pop()
             if target == current_bong:
-                date_weight = bong_order//10*weight
+                date_weight = (bong_order//10)*day_weight
                 nasdaq_weight = get_NASDAQ_weight(target_nasdaq, stockData['nasdaq'][bong_order+N_items])
-                score = 1 + date_weight + 2*nasdaq_weight
+                score = 1 + date_weight + nas_weight*nasdaq_weight
                 next_bong = next_bong[2:4]
                 if "P0" == next_bong:
                     A["P0"] += score
