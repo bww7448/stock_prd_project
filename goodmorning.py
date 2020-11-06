@@ -10,7 +10,7 @@ if __name__ == "__main__":
 
     call_nasdaq()
     update_stockData_with_labels()
-    check_labellingNASDAQ()
+    #check_labellingNASDAQ()
     
     endTime = time()
     print("time: {}ms".format((endTime - startTime)*1000))
