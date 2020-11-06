@@ -77,4 +77,4 @@ def win_lose_test(zzin_df = "zzin_df_item6", first_profit = 0.05, first_loss = 0
     win_lose_table.to_csv("resources/sample_table.csv", encoding = 'euc-kr') 
     return win_lose_table
 
-win_lose_test(zzin_df = "item6_zzin_winlose2", first_profit = 0.05, first_loss = 0.08, second_profit = 0.04, second_loss = 0.05,third_profit = 0.01)
+win_lose_test(zzin_df = "5item_best_100_4df", first_profit = 0.05, first_loss = 0.05, second_profit = 0.04, second_loss = 0.04,third_profit = 0.01)

@@ -130,10 +130,10 @@ NASDAQ_weight = [
 [13.62,13.85,13.09,10.24,13.31,13.06, 6.10, 2.50,14.22]
 ]
 NASDAQ_weight_dict = {"U01":0, "U02":1, "U03":2, "U04":3, "D01":4, "D02":5, "D03":6, "D04":7, "T01":8}
-for item in range(6,7) :
+for item in range(5,6) :
     rand_count = 0
 #for rand in range(1000) :
-    for rand_day_weight2 in range(0, 3) :
+    for rand_day_weight2 in range(1, 2) :
         rand_day_weight = rand_day_weight2*0.5
         for rand_nas_weight in range(0,3) :
             rand_count +=1
@@ -152,8 +152,8 @@ for item in range(6,7) :
                 zzin_weight = pd.DataFrame({"day_weight" : [rand_day_weight], "nas_weight" : [rand_nas_weight],
                 "accuracy" : [accuracy], "Nasdaq_weight" : [NASDAQ_weight]})
                 best_100_df = zzin_df.copy()
-                best_100_df.to_csv("/resources/{}item_best_100_{}df.csv".format(item, rand_count) , encoding = "euc-kr")
-                zzin_weight.to_csv("/resources/{}item_best_weigt{}_df.csv".format(item, rand_count))
+                best_100_df.to_csv("resources/{}item_best_te_100_day1_{}df.csv".format(item, rand_count) , encoding = "euc-kr")
+                zzin_weight.to_csv("resources/{}item_best_te_weigt_day1_{}_df.csv".format(item, rand_count))
                 print("바꼈지롱")
             print(item, "item의", rand_count, "번째지롱")
 print(zzin_weight)
