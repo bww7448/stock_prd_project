@@ -18,21 +18,26 @@ def samjung_stock_pred(day_weight=0.5, N_items=5):
     stock_pred_df = pd.DataFrame({'P_score': [], 'predict' : [],'real' : [], 'stock_name' : [], 'stock_code': [], 'Date' : []})
     stock_list = pd.read_csv('resources/2year_tripleScreen_modified60.csv', dtype = {"종목코드": str, "회사명": str}, 
                              parse_dates = ['날짜'], index_col = [0])
-    stock_date = "아무거"
+    stock_date = "뒁이 바보"
 
-    for list_num in range(len(stock_list) + 1):
-        #날짜가 달라지면 all_stock_pred에 상위 5개만 저장
-        if stock_list.iloc[list_num, 0] != stock_date :
-            stock_pred_df = stock_pred_df.sort_values(by=['P_score'], axis=0, ascending = False)
-            stock_pred_df = stock_pred_df.head()
-            all_stock_pred_df = all_stock_pred_df.append(stock_pred_df)
-            stock_pred_df = pd.DataFrame({'P_score': [], 'predict' : [],'stock_name' : [], 'stock_code': [], 'Date' : []})
+    for list_num in range(len(stock_list)+1):
+        print(list_num, "/", len(stock_list))
+
         #막줄까지 끝내고 나면 똑같은 작업(|(or)이 안먹혀 수진아 해결해줘)
-        elif list_num == len(stock_list) :
+        if list_num == len(stock_list) :
             stock_pred_df = stock_pred_df.sort_values(by=['P_score'], axis=0, ascending = False)
             stock_pred_df = stock_pred_df.head()
             all_stock_pred_df = all_stock_pred_df.append(stock_pred_df)
             stock_pred_df = pd.DataFrame({'P_score': [], 'predict' : [],'stock_name' : [], 'stock_code': [], 'Date' : []})
+            print("끝")
+            break
+        #날짜가 달라지면 all_stock_pred에 상위 5개만 저장
+        elif stock_list.iloc[list_num, 0] != stock_date :
+            stock_pred_df = stock_pred_df.sort_values(by=['P_score'], axis=0, ascending = False)
+            stock_pred_df = stock_pred_df.head()
+            all_stock_pred_df = all_stock_pred_df.append(stock_pred_df)
+            stock_pred_df = pd.DataFrame({'P_score': [], 'predict' : [],'stock_name' : [], 'stock_code': [], 'Date' : []})
+            print(stock_date, "완료")
             
         #삼중창에서 날짜, 코드 찾고 그에 해당하는 데이터 불러오기
         stock_code = stock_list.iloc[list_num, 1]

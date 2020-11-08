@@ -106,7 +106,8 @@ def test_zzin(stock_code=None, day_weight=0.05, min_P_score=50, N_items=3, past_
                     pass
                 else:
                     A_pr['P_score'] = round(
-                        ((A['P0']+A['P1']) / (A['P0']+A['P1']+A['M0']+A['M1']+A['K0']))*100, 2)
+                        ((A['P0']+A
+                        ['P1']) / (A['P0']+A['P1']+A['M0']+A['M1']+A['K0']))*100, 2)
                     if A_pr['P_score'] >= min_P_score:
                         predict = max(A.keys(), key = (lambda k : A[k]))
                         A_pred_df = pd.DataFrame({'P_score': [A_pr["P_score"]], 'predict' : [predict],'real':[ A_pr["real"][0:2]], 

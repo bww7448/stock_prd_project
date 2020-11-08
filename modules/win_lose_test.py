@@ -23,13 +23,14 @@ def win_lose_test(zzin_df = "zzin_df_item6", first_profit = 0.05, first_loss = 0
         win_lose_score = {"Date" : stock_date, "stock_name" : stock_name,
         "today_win" : 0, "today_lose" : 0, "tomorrow_win" : 0, "tomorrow_lose" : 0, "day2_win" : 0, "day2_lose" : 0,
         "real_profit" : 0, "Nasdaq" : stockData.iloc[vs_index]["nasdaq"].values[0]}
+        last_bong = stockData.iloc[vs_index-1]
         first_bong = stockData.iloc[vs_index]
         #print(first_bong)
         second_bong = stockData.iloc[vs_index+1]
         #print(second_bong)
         third_bong = stockData.iloc[vs_index+2]
         #print(third_bong)
-        buy_price = first_bong["open"].values[0]
+        buy_price = last_bong["close"].values[0]
         #print(buy_price)
         if buy_price * (1 + first_profit) < first_bong["high"].values[0]:
             win_lose_score["today_win"] += 1
@@ -39,7 +40,7 @@ def win_lose_test(zzin_df = "zzin_df_item6", first_profit = 0.05, first_loss = 0
             win_lose_score["real_profit"] += ((first_bong["close"].values[0] - buy_price)/buy_price)
         elif buy_price * (1-first_loss) > first_bong["close"].values[0]:
             win_lose_score["today_lose"] += 1
-            win_lose_score["real_profit"] += -first_loss
+            win_lose_score["real_profit"] += ((first_bong["close"].values[0] - buy_price)/buy_price)
         # elif buy_price * 1.01 < first_bong["close"].values[0] :
         #     win_lose_score["today_win"] += 1
         #     win_lose_score["real_profit"] += ((first_bong["close"].values[0] - buy_price) / buy_price )
@@ -52,7 +53,7 @@ def win_lose_test(zzin_df = "zzin_df_item6", first_profit = 0.05, first_loss = 0
                 win_lose_score["real_profit"] += ((second_bong["close"].values[0] - buy_price)/buy_price)
             elif buy_price * (1-second_loss) > second_bong["close"].values[0] :
                 win_lose_score["tomorrow_lose"] += 1
-                win_lose_score["real_profit"] += -second_loss
+                win_lose_score["real_profit"] += ((second_bong["close"].values[0] - buy_price)/buy_price)
                 #win_lose_score["real_profit"] += ((second_bong["close"].values[0] - buy_price)/buy_price)
             else :
                 #if buy_price*0.95 > third_bong["low"].values[0] :
@@ -78,7 +79,7 @@ def win_lose_test(zzin_df = "zzin_df_item6", first_profit = 0.05, first_loss = 0
         "real_profit" : [win_lose_score["real_profit"]], "Nasdaq" : [win_lose_score["Nasdaq"]]})
         win_lose_table = win_lose_table.append(win_lose_score_df)
     print(win_lose_table)
-    win_lose_table.to_csv("resources/sample_table_10,4,7.5,2,5.csv", encoding = 'euc-kr') 
+    win_lose_table.to_csv("resources/2year_sample_table_10,4,7.5,2,5.csv", encoding = 'euc-kr') 
     return win_lose_table
 
-win_lose_test(zzin_df = "samjung_test", first_profit = 0.1, first_loss = 0.04, second_profit = 0.075, second_loss = 0.02,third_profit = 0.05)
+win_lose_test(zzin_df = "2year_samjung_test", first_profit = 0.1, first_loss = 0.04, second_profit = 0.075, second_loss = 0.02,third_profit = 0.05)

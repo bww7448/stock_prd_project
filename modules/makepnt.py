@@ -59,7 +59,7 @@ def tripleScreenAnalysis(emaSpan, startDate = None, endDate = None):
     df_res = df_res.sort_values(by=['날짜'])
     df_res_modified = df_res_modified.sort_values(by=['날짜'])
     df_res.to_csv(f"resources/2year_tripleScreen{emaSpan}.csv")
-    df_res_modified.to_csv(f"resources/2year_tripleScreen_modified{emaSpan}.csv")
+    df_res_modified.to_csv(f"resources/new_tripleScreen_modified{emaSpan}.csv")
 
     endTime = time()
 
@@ -67,4 +67,4 @@ def tripleScreenAnalysis(emaSpan, startDate = None, endDate = None):
 
 if __name__ == "__main__":
     # tripleScreenAnalysis(60)
-    tripleScreenAnalysis(60, "2018-10-23", "2020-10-23")
+    tripleScreenAnalysis(60, "2020-11-04", "2020-11-09")
