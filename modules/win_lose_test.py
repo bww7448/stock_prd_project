@@ -1,4 +1,6 @@
 import pandas as pd
+
+
 def win_lose_test(zzin_df = "zzin_df_item6", first_profit = 0.05, first_loss = 0.05, second_profit = 0.05, second_loss = 0.05, third_profit = 0.05):
     stock_list = pd.read_csv('resources/stockcode.csv', dtype = {"종목코드": str, "회사명": str}, encoding = "UTF-8")
     zzin_df = pd.read_csv('resources/{}.csv'.format(zzin_df), dtype = {"stock_code" :str}, parse_dates=['Date'], index_col=[0], encoding = "949")

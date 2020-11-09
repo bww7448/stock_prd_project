@@ -15,7 +15,7 @@ stock_list = pd.read_csv("resources/stockcode.csv",
 
 def update_stockData_with_labels(start_date=None, NOT_NEXT_DAY=True):
     '''
-    라벨링된 데이터에 최신 주식 데이터를 업데이트합니다. 최소 2분이 소요됩니다.
+    라벨링된 데이터에 최신 주식 데이터를 업데이트합니다.
     '''
     pd_today = pd.to_datetime(pd.Timestamp.now().date())
 
@@ -93,6 +93,11 @@ def update_stockData_with_labels(start_date=None, NOT_NEXT_DAY=True):
                     f.write(temp)
             else:
                 update_target.to_csv(filename)
+
+
+
+
+
 
 
 
