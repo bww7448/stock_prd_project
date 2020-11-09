@@ -17,13 +17,13 @@ def tripleScreenAnalysis(emaSpan, startDate = None, endDate = None):
         stockcode = stockcode.종목코드
 
         df = pd.read_csv(f"resources/ohlcv_p1p2p3_nasdq/{stockcode}.csv", parse_dates=['date'], index_col=['date'])
-        today = pd.Timestamp.now().date()
-        if df.iloc[-1].name != today:
-            raise Exception("리소스가 최근 파일이 아닙니다. 먼저 리소스를 갱신해주세요.")   # TODO: 필터 다르게 넣어야함
-        else:
-            df = df[['open','high','low','close','volume']].iloc[0:len(df)-1]
 
-        if df.volume.values[-1] < 50000:
+        saved = df.iloc[-1].name
+        today = pd.to_datetime(pd.Timestamp.now())
+        saved = today - saved
+        if saved >= pd.Timedelta(hours=0) and saved < pd.Timedelta(hours=15.5): # 오늘의 장이 끝나지 않았을 때
+            df = df[['open','high','low','close','volume']].iloc[0:len(df)-1]
+        if df.volume.values[-1] < 1000000:
             continue
         ema = df.close.ewm(span=emaSpan).mean()
         df = df.assign(ema=ema).dropna()
@@ -58,13 +58,9 @@ def tripleScreenAnalysis(emaSpan, startDate = None, endDate = None):
 
     df_res = df_res.sort_values(by=['날짜'])
     df_res_modified = df_res_modified.sort_values(by=['날짜'])
-    df_res.to_csv(f"resources/2year_tripleScreen{emaSpan}.csv")
-    df_res_modified.to_csv(f"resources/new_tripleScreen_modified{emaSpan}.csv")
+    df_res.to_csv(f"resources/1110_tripleScreen{emaSpan}.csv")
+    df_res_modified.to_csv(f"resources/1110_tripleScreen_modified{emaSpan}.csv")
 
     endTime = time()
 
     print(f"{(endTime-startTime)*1000}ms")
-
-if __name__ == "__main__":
-    # tripleScreenAnalysis(60)
-    tripleScreenAnalysis(60, "2020-11-04", "2020-11-09")

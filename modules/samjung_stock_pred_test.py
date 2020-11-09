@@ -16,7 +16,7 @@ def samjung_stock_pred(day_weight=0.5, N_items=5):
     #기본 데이터 셋 만들기
     all_stock_pred_df = pd.DataFrame({'P_score': [], 'predict' : [], 'real' : [], 'stock_name' : [], 'stock_code': [], 'Date' : []})
     stock_pred_df = pd.DataFrame({'P_score': [], 'predict' : [],'real' : [], 'stock_name' : [], 'stock_code': [], 'Date' : []})
-    stock_list = pd.read_csv('resources/2year_tripleScreen_modified60.csv', dtype = {"종목코드": str, "회사명": str}, 
+    stock_list = pd.read_csv('resources/1110_tripleScreen_modified60.csv', dtype = {"종목코드": str, "회사명": str}, 
                              parse_dates = ['날짜'], index_col = [0])
     stock_date = "뒁이 바보"
 
@@ -105,6 +105,6 @@ def samjung_stock_pred(day_weight=0.5, N_items=5):
 
 samjung_test = samjung_stock_pred(day_weight=0.5, N_items=5)
 print(samjung_test)
-samjung_test.to_csv("resources/2year_samjung_test.csv", encoding = "euc-kr")
+samjung_test.to_csv("resources/1110_recommend.csv", encoding = "euc-kr")
 print(confusion_matrix(samjung_test["predict"], samjung_test["real"]))
 print(classification_report(samjung_test["predict"], samjung_test["real"]))
