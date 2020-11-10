@@ -4,7 +4,8 @@ import pandas as pd
 
 def labellingD0(d0) -> str:
     '''
-    D0 시점의 각 봉에 대한 라벨링 25가지
+    D0 시점의 각 봉에 대한 라벨링(25가지)을 수행합니다.
+    당일 1일치(1 row) pd.DataFrame을 입력해주세요.
     '''
     openP = d0['open']
     highP = d0['high']

@@ -1,18 +1,15 @@
 from modules.load_data import *
 from time import time
-from modules.makepnt import tripleScreenAnalysis
 
 
 if __name__ == "__main__":
     '''
-    평일 아침에 돌릴 것들
+    csv 갱신용
     '''
     startTime = time()
 
-    #call_nasdaq()
     update_stockData_with_labels()
-    # tripleScreenAnalysis(60)
-    #check_labellingNASDAQ()
+
     
     endTime = time()
     print("time: {}ms".format((endTime - startTime)*1000))
