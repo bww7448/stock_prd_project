@@ -7,8 +7,6 @@ from time import sleep
 
 from modules.pattern_labelling import *
 
-nsq_p = pd.read_csv("resources/nasdaq.csv",
-                    parse_dates=['date'])[['date', 'nasdaq']]
 stock_list = pd.read_csv("resources/stockcode.csv",
                          dtype={"종목코드": str, "회사명": str})
 
@@ -90,13 +88,25 @@ def update_stockData_with_labels(start_date=None):
             update_target.to_csv(filename)
 
 
-
-
-
+def cleanup_stockData():
+    '''
+    테스트용으로 남은 columns를 지우고 필요한 데이터만을 남깁니다.
+    '''
+    for stock_code in stock_list['종목코드'].iloc:
+        filename = f'resources/ohlcv_p1p2p3_nasdq/{stock_code}.csv'
+        try:    
+            update_target = pd.read_csv(filename, parse_dates=['date'], index_col=[0])
+        except FileNotFoundError:
+            continue        
+        update_target = update_target[['date','open','high','low','close','volume','pattern1']]
+        update_target.to_csv(filename)
 # -------------------------------------------------------------------------------------------------------------
 # -------------------------------------------------------------------------------------------------------------
 
 # DUMMY
+
+# nsq_p = pd.read_csv("resources/nasdaq.csv",
+#                     parse_dates=['date'])[['date', 'nasdaq']]
 
 def update_stockData():
     '''

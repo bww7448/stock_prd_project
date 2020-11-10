@@ -6,33 +6,22 @@ def samjung_stock_pred(day_weight=0.5, N_items=5):
     n-items serial association rule analysis를 통해 다음 주식 패턴을 예측합니다.
 
     [parameter]
-    - stock_code    종목코드를 int 또는 list 형태로 입력, 
-                    미입력 시 무작위로 샘플링한 10개의 종목으로 테스트합니다. #이것도 필요 없음
-                    str "all" 입력 시 전체 종목으로 테스트합니다.
     - day_weight        시간에 따른 가중치를 입력합니다. 미입력 시 0.05로 적용됩니다.
-    - min_P_score   입력된 값(0 ~ 100) 미만의 P_score를 보이는 결과는 보여주지 않습니다. 미입력 시 50으로 적용됩니다.#필요없음
     - N_items       연관 규칙 시 장바구니에 묶을 item 수를 정합니다. 미입력 시 3개씩 묶습니다.
     '''
     #기본 데이터 셋 만들기
     all_stock_pred_df = pd.DataFrame({'P_score': [], 'predict' : [], 'real' : [], 'stock_name' : [], 'stock_code': [], 'Date' : []})
     stock_pred_df = pd.DataFrame({'P_score': [], 'predict' : [],'real' : [], 'stock_name' : [], 'stock_code': [], 'Date' : []})
-    stock_list = pd.read_csv('resources/1110_tripleScreen_modified60.csv', dtype = {"종목코드": str, "회사명": str}, 
+    stock_list = pd.read_csv('resources/TripleScreen_60_modified.csv', dtype = {"종목코드": str}, 
                              parse_dates = ['날짜'], index_col = [0])
     stock_date = "뒁이 바보"
+    len_stock_list = len(stock_list)
 
-    for list_num in range(len(stock_list)+1):
-        print(list_num, "/", len(stock_list))
+    for list_num in range(len_stock_list):
+        print(list_num, "/", len_stock_list)
 
-        #막줄까지 끝내고 나면 똑같은 작업(|(or)이 안먹혀 수진아 해결해줘)
-        if list_num == len(stock_list) :
-            stock_pred_df = stock_pred_df.sort_values(by=['P_score'], axis=0, ascending = False)
-            stock_pred_df = stock_pred_df.head()
-            all_stock_pred_df = all_stock_pred_df.append(stock_pred_df)
-            stock_pred_df = pd.DataFrame({'P_score': [], 'predict' : [],'stock_name' : [], 'stock_code': [], 'Date' : []})
-            print("끝")
-            break
         #날짜가 달라지면 all_stock_pred에 상위 5개만 저장
-        elif stock_list.iloc[list_num, 0] != stock_date :
+        if stock_list.iloc[list_num, 0] != stock_date :
             stock_pred_df = stock_pred_df.sort_values(by=['P_score'], axis=0, ascending = False)
             stock_pred_df = stock_pred_df.head()
             all_stock_pred_df = all_stock_pred_df.append(stock_pred_df)
@@ -68,7 +57,6 @@ def samjung_stock_pred(day_weight=0.5, N_items=5):
         target = []
         for i in range(1, N_items):
             target.append(f"0{i}" + stockData['pattern1'].iloc[-N_items-1+i])
-        target_nasdaq = stockData['nasdaq'].iloc[-N_items]
         stock_name = stock_list.회사명[stock_list['종목코드'] == stock_code].values[0]
 
         A = {'P0': 0, 'P1': 0, 'M0': 0, 'M1': 0, 'K0': 0}
@@ -101,10 +89,18 @@ def samjung_stock_pred(day_weight=0.5, N_items=5):
         A_pred_df = pd.DataFrame({'P_score': [A_pr["P_score"]], 'predict' : [predict], 'real':[ A_pr["real"][0:2]], 
             'stock_name' : [A_pr['stock_name']], 'stock_code': [A_pr['stock_code']], 'Date' : [A_pr['Date']]})
         stock_pred_df = stock_pred_df.append(A_pred_df)
+
+    stock_pred_df = stock_pred_df.sort_values(by=['P_score'], axis=0, ascending = False)
+    stock_pred_df = stock_pred_df.head()
+    all_stock_pred_df = all_stock_pred_df.append(stock_pred_df)
+    print("끝")
+        
     return all_stock_pred_df
 
-samjung_test = samjung_stock_pred(day_weight=0.5, N_items=5)
-print(samjung_test)
-samjung_test.to_csv("resources/1110_recommend.csv", encoding = "euc-kr")
-print(confusion_matrix(samjung_test["predict"], samjung_test["real"]))
-print(classification_report(samjung_test["predict"], samjung_test["real"]))
+
+if __name__ == "__main__":
+    samjung_test = samjung_stock_pred(day_weight=0.5, N_items=5)
+    print(samjung_test)
+    samjung_test.to_csv("resources/1110_recommend.csv", encoding = "euc-kr")
+    print(confusion_matrix(samjung_test["predict"], samjung_test["real"]))
+    print(classification_report(samjung_test["predict"], samjung_test["real"]))
