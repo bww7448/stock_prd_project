@@ -85,8 +85,6 @@ def update_stockData_with_labels(start_date=None):
             with open(filename, 'a', encoding='UTF-8') as f:
                 f.write(temp)
 
-            update_target.to_csv(filename)
-
 
 def cleanup_stockData():
     '''

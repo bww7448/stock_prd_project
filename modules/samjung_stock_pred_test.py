@@ -12,7 +12,7 @@ def samjung_stock_pred(day_weight=0.5, N_items=5):
     #기본 데이터 셋 만들기
     all_stock_pred_df = pd.DataFrame({'P_score': [], 'predict' : [], 'real' : [], 'stock_name' : [], 'stock_code': [], 'Date' : []})
     stock_pred_df = pd.DataFrame({'P_score': [], 'predict' : [],'real' : [], 'stock_name' : [], 'stock_code': [], 'Date' : []})
-    stock_list = pd.read_csv('resources/TripleScreen_60_modified.csv', dtype = {"종목코드": str}, 
+    stock_list = pd.read_csv('resources/TripleScreen_modified60.csv', dtype = {"종목코드": str}, 
                              parse_dates = ['날짜'], index_col = [0])
     stock_date = "뒁이 바보"
     len_stock_list = len(stock_list)
