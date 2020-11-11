@@ -1,6 +1,7 @@
 from modules.load_data import update_stockData_with_labels
 from modules.triple_screen import tripleScreenAnalysis
 from modules.samjung_stock_pred_test import samjung_stock_pred
+from modules.warehouse import get_strDate
 
 from sklearn.metrics import confusion_matrix, classification_report
 from time import time
@@ -20,7 +21,7 @@ if __name__ == "__main__":
 
     samjung_test = samjung_stock_pred(day_weight=0.5, N_items=5)
     print(samjung_test)
-    samjung_test.to_csv("resources/1111_recommend.csv", encoding = "euc-kr")
+    samjung_test.to_csv(f"resources/{get_strDate(1)}_recommend.csv", encoding = "euc-kr")
     print(confusion_matrix(samjung_test["predict"], samjung_test["real"]))
     print(classification_report(samjung_test["predict"], samjung_test["real"]))
     
