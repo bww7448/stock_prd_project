@@ -12,7 +12,7 @@ def samjung_stock_pred(day_weight=0.5, N_items=5):
     #기본 데이터 셋 만들기
     all_stock_pred_df = pd.DataFrame({'P_score': [], 'predict' : [], 'real' : [], 'stock_name' : [], 'stock_code': [], 'Date' : []})
     stock_pred_df = pd.DataFrame({'P_score': [], 'predict' : [],'real' : [], 'stock_name' : [], 'stock_code': [], 'Date' : []})
-    stock_list = pd.read_csv('resources/TripleScreen_modified60.csv', dtype = {"종목코드": str}, 
+    stock_list = pd.read_csv('resources/TripleScreen60.csv', dtype = {"종목코드": str}, 
                              parse_dates = ['날짜'], index_col = [0])
     stock_date = "뒁이 바보"
     len_stock_list = len(stock_list)
@@ -31,7 +31,7 @@ def samjung_stock_pred(day_weight=0.5, N_items=5):
         #삼중창에서 날짜, 코드 찾고 그에 해당하는 데이터 불러오기
         stock_code = stock_list.iloc[list_num, 1]
         stock_date = stock_list.iloc[list_num, 0]
-        stockData = pd.read_csv(f'resources/ohlcv_p1p2p3_nasdq/{stock_code}.csv', parse_dates=['date'], index_col=[0])
+        stockData = pd.read_csv(f'resources/stock_market_data/{stock_code}.csv', parse_dates=['date'], index_col=[0])
 
         #stockData의 마지막 날짜를 stock_date와 맞추기
         while stockData.iloc[-1,0] != stock_date :
@@ -101,6 +101,6 @@ def samjung_stock_pred(day_weight=0.5, N_items=5):
 if __name__ == "__main__":
     samjung_test = samjung_stock_pred(day_weight=0.5, N_items=5)
     print(samjung_test)
-    samjung_test.to_csv("resources/1110_recommend.csv", encoding = "euc-kr")
+    samjung_test.to_csv("resources/RECOMMEND/1110_recommend.csv", encoding = "euc-kr")
     print(confusion_matrix(samjung_test["predict"], samjung_test["real"]))
     print(classification_report(samjung_test["predict"], samjung_test["real"]))

@@ -19,7 +19,7 @@ def win_lose_test(zzin_df = "zzin_df_item6", first_profit = 0.05, first_loss = 0
             stock_code = code_plus + stock_code
         print(stock_code)
         stock_date = date_sample.iloc[i]
-        stockData = pd.read_csv('resources/ohlcv_p1p2p3_nasdq/{}.csv'.format(stock_code), parse_dates=['date'], index_col=[0])
+        stockData = pd.read_csv('resources/stock_market_data/{}.csv'.format(stock_code), parse_dates=['date'], index_col=[0])
         ssa = stock_list.회사명[stock_list['종목코드'] == stock_code]
         stock_name = ssa.values[0]
         vs_index = stockData.index[stockData['date'] == stock_date]

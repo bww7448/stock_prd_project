@@ -16,7 +16,7 @@ def get_strDate(daysDelta=None, dateFormat="YYMMDD"):
         yyyymmdd = list(map(str,yyyymmdd))
         return "".join(yyyymmdd)
     elif dateFormat == "YYMMDD":
-        yymmdd = [date.year[2:4], date.month, date.day]
+        yymmdd = [date.year%100, date.month, date.day]
         yymmdd = list(map(str,yymmdd))
         return "".join(yymmdd)
     elif dateFormat == "MMDD":

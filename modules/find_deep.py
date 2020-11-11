@@ -44,7 +44,7 @@ def test_zzin(stock_code=None, day_weight=0.05, min_P_score=50, N_items=3, past_
         raise TypeError("N_items에는 2 이상 9 이하의 정수가 입력되어야 합니다.")
     himdlda = 1
     for stock_code in stock_sample:
-        stockData = pd.read_csv('resources/ohlcv_p1p2p3_nasdq/{}.csv'.format(stock_code), parse_dates=['date'], index_col=[0])
+        stockData = pd.read_csv('resources/stock_market_data/{}.csv'.format(stock_code), parse_dates=['date'], index_col=[0])
         pattern_count = 0
         if len(stockData) < 500 :
             pass
