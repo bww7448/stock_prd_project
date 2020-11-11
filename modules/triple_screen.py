@@ -18,7 +18,7 @@ def tripleScreenAnalysis(emaSpan, startDate = None, endDate = None):
         lastIdx = len(df) -1
         if df.open.values[lastIdx] == -1:
             df = df.drop([lastIdx])
-        if df.volume.values[-1] < 1000000:
+        if df.volume.values[-1] < 500000:
             continue
         ema = df.close.ewm(span=emaSpan).mean()
         df = df.assign(ema=ema).dropna()
@@ -46,13 +46,12 @@ def tripleScreenAnalysis(emaSpan, startDate = None, endDate = None):
 
         for i in range(1,len(df)):
             if df.ema.values[i-1] < df.ema.values[i]:
-                # if df.fast_k.values[i-1] >= 20 and df.fast_k.values[i] < 20:
-                #     df_res = df_res.append({'날짜':df.index.values[i],'종목코드':stockcode,'회사명':stockname,'거래량':df.volume.values[i]},ignore_index=True)
-                if df.fast_k.values[i] >= 20 and df.fast_k.values[i-1] < 20:
+                if df.fast_k.values[i] >= 20 and df.fast_k.values[i] < 80 and df.fast_k.values[i-1] < 20:
                     df_res_modified = df_res_modified.append({'날짜':df.date.values[i],'종목코드':stockcode,'회사명':stockname,'거래량':df.volume.values[i]},ignore_index=True)
 
-    # df_res = df_res.sort_values(by=['날짜'])
-    # df_res.to_csv(f"resources/1110_tripleScreen{emaSpan}.csv")
     df_res_modified = df_res_modified.sort_values(by=['날짜'])
     df_res_modified = df_res_modified.reset_index(drop=True)
-    df_res_modified.to_csv(f"resources/TripleScreen_{emaSpan}_modified.csv")
+    df_res_modified.to_csv(f"resources/TripleScreen_modified{emaSpan}.csv")
+
+if __name__ == "__main__":
+    tripleScreenAnalysis(60)
