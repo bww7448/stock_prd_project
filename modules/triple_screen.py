@@ -13,6 +13,9 @@ def tripleScreenAnalysis(emaSpan, startDate = None, endDate = None):
         stockname = stockcode.회사명
         stockcode = stockcode.종목코드
 
+        # if stockcode == "068760":
+            # print("????") # 디버깅용
+
         df = pd.read_csv(f"resources/stock_market_data/{stockcode}.csv", parse_dates=['date'], index_col=[0])
         df = df[['date','open','high','low','close','volume']]
         lastIdx = len(df) -1
@@ -46,7 +49,7 @@ def tripleScreenAnalysis(emaSpan, startDate = None, endDate = None):
 
         for i in range(1,len(df)):
             if df.ema.values[i-1] < df.ema.values[i]:
-                if df.fast_k.values[i] >= 20 and df.fast_k.values[i] < 80 and df.fast_k.values[i-1] < 20:
+                if df.fast_k.values[i] >= 20 and df.fast_k.values[i] < 70 and df.fast_k.values[i-1] < 20:
                     df_res = df_res.append({'날짜':df.date.values[i],'종목코드':stockcode,'회사명':stockname,'거래량':df.volume.values[i]},ignore_index=True)
 
     df_res = df_res.sort_values(by=['날짜'])
