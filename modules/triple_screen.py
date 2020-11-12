@@ -21,7 +21,7 @@ def tripleScreenAnalysis(emaSpan, startDate = None, endDate = None):
         lastIdx = len(df) -1
         if df.open.values[lastIdx] == -1:
             df = df.drop([lastIdx])
-        if df.volume.values[-1] < 500000:
+        if df.volume.values[-1] < 1000000:
             continue
         ema = df.close.ewm(span=emaSpan).mean()
         df = df.assign(ema=ema).dropna()
