@@ -84,7 +84,7 @@ def win_lose_test(zzin_df = "zzin_df_item6", first_profit = 0.05, first_loss = 0
         "real_profit" : [win_lose_score["real_profit"]], "Nasdaq" : [win_lose_score["Nasdaq"]]})
         win_lose_table = win_lose_table.append(win_lose_score_df)
     print(win_lose_table)
-    win_lose_table.to_csv("resources/wdhs_ver1_winlose_table_10,4,7.5,3,5.csv", encoding = 'euc-kr') 
+    win_lose_table.to_csv("resources/wdhs_ver3/wdhs_ver3.2_winlose_table_10,4,7.5,3,5.csv", encoding = 'euc-kr') 
     return win_lose_table
 
-win_lose_test(zzin_df = "wdhs_ver1/wdhs_ver1_df", first_profit = 0.1, first_loss = 0.04, second_profit = 0.075, second_loss = 0.03,third_profit = 0.05)
+win_lose_test(zzin_df = "wdhs_ver3/wdhs_ver3.2_df", first_profit = 0.1, first_loss = 0.04, second_profit = 0.075, second_loss = 0.03,third_profit = 0.05)
