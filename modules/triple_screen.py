@@ -1,8 +1,7 @@
 import pandas as pd
 import numpy as np
-from modules.warehouse import get_strDate
 
-def tripleScreenAnalysis(emaSpan, startDate = None, endDate = None):
+def tripleScreenAnalysis(emaSpan, startDate = None, endDate = None, memo=""):
 
     stock_list = pd.read_csv("resources/stockcode.csv",dtype = {"종목코드": str, "회사명": str}, index_col=[0])
     df_res = pd.DataFrame({"날짜":[],"종목코드":[],"회사명":[],'거래량':[]})
@@ -14,7 +13,7 @@ def tripleScreenAnalysis(emaSpan, startDate = None, endDate = None):
         stockcode = stockcode.종목코드
 
         # if stockcode == "068760":
-            # print("????") # 디버깅용
+            # print("????") # 종단점 찍는 디버깅용
 
         df = pd.read_csv(f"resources/stock_market_data/{stockcode}.csv", parse_dates=['date'], index_col=[0])
         df = df[['date','open','high','low','close','volume']]
@@ -35,15 +34,19 @@ def tripleScreenAnalysis(emaSpan, startDate = None, endDate = None):
         if startDate is None and endDate is None:
             df = df.iloc[[-2,-1]]
         elif endDate is None:
-            temp1 = np.where(df.index >= startDate)[0][0]
+            startDate = pd.Timestamp(startDate)
+            temp1 = np.where(df.date >= startDate)[0][0]
             df = df.iloc[temp1-1 : len(df)]
         elif startDate is None:
-            temp2 = np.where(df.index <= endDate)[0]
+            endDate = pd.Timestamp(endDate)
+            temp2 = np.where(df.date <= endDate)[0]
             temp2 = temp2[len(temp2)-1]
             df = df.iloc[temp2-1:temp2+1]
         else:
-            temp1 = np.where(df.index >= startDate)[0][0]
-            temp2 = np.where(df.index <= endDate)[0]
+            startDate = pd.Timestamp(startDate)
+            endDate = pd.Timestamp(endDate)
+            temp1 = np.where(df.date >= startDate)[0][0]
+            temp2 = np.where(df.date <= endDate)[0]
             temp2 = temp2[len(temp2)-1]
             df = df.iloc[temp1-1:temp2+1]
 
@@ -54,7 +57,7 @@ def tripleScreenAnalysis(emaSpan, startDate = None, endDate = None):
 
     df_res = df_res.sort_values(by=['날짜'])
     df_res = df_res.reset_index(drop=True)
-    df_res.to_csv(f"resources/TripleScreen{emaSpan}.csv")
+    df_res.to_csv(f"resources/TripleScreen{emaSpan}_{memo}.csv")
 
 if __name__ == "__main__":
-    tripleScreenAnalysis(60)
+    tripleScreenAnalysis(60, startDate = "2018-11-01", endDate = "2020-10-31", memo="2years")
