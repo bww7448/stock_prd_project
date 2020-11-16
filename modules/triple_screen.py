@@ -51,6 +51,8 @@ def tripleScreenAnalysis(emaSpan, startDate = None, endDate = None, memo="", GWA
             df = df.iloc[temp1-1:temp2+1]
 
         for i in range(1,len(df)):
+            if (df.close.values[i] < 1000 and df.volume.values[i] < 5000000) or (df.volume.values[i] < VOLUME):
+                continue
             if df.ema.values[i-1] < df.ema.values[i]:
                 if df.fast_k.values[i] >= 20 and df.fast_k.values[i] < GWAMAEDO and df.fast_k.values[i-1] < 20:
                     df_res = df_res.append({'날짜':df.date.values[i],'종목코드':stockcode,'회사명':stockname,'거래량':df.volume.values[i]},ignore_index=True)
