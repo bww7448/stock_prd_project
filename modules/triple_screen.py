@@ -18,16 +18,20 @@ def tripleScreenAnalysis(emaSpan, startDate = None, endDate = None, memo="", GWA
         df = pd.read_csv(f"resources/stock_market_data/{stockcode}.csv", parse_dates=['date'], index_col=[0])
         df = df[['date','open','high','low','close','volume']]
         lastIdx = len(df) -1
+
+        # 더미 데이터 제거
         if df.open.values[lastIdx] == -1:
             df = df.drop([lastIdx])
         if df.volume.values[-1] < VOLUME:
             continue
+
+        # Weight_exp func.: 종가의 60일(12주) 지수 이동평균
         ema = df.close.ewm(span=emaSpan).mean()
         df = df.assign(ema=ema).dropna()
 
+        # Stochastic: 지난 5일 동안의 거래 범위에서 현재 가격의 위치
         ndays_high = df.high.rolling(window=5, min_periods=1).max()
         ndays_low = df.low.rolling(window=5, min_periods=1).min()
-
         fast_k = (df.close - ndays_low) / (ndays_high - ndays_low) * 100
         df = df.assign(fast_k=fast_k).dropna()
 
@@ -60,5 +64,5 @@ def tripleScreenAnalysis(emaSpan, startDate = None, endDate = None, memo="", GWA
     df_res.to_csv(f"resources/TripleScreen{emaSpan}_{memo}.csv")
 
 if __name__ == "__main__":
-    # tripleScreenAnalysis(60, startDate = "2018-11-01", endDate = "2020-10-31", memo="ts80")
-    pass
+    tripleScreenAnalysis(60, startDate = "2018-11-01", endDate = "2020-10-31", memo="ts80")
+    # pass

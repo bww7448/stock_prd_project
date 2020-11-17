@@ -15,7 +15,6 @@ if __name__ == "__main__":
     print("데이터 업데이트 완료 -> spent time: {}ms".format((endTime - startTime)*1000))
 
 
-
     startTime = endTime
     tripleScreenAnalysis(60)
     endTime = time()

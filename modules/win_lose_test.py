@@ -4,14 +4,16 @@ import pandas as pd
 def win_lose_test(zzin_df = "zzin_df_item6", first_profit = 0.05, first_loss = 0.05, second_profit = 0.05, second_loss = 0.05, third_profit = 0.05):
     stock_list = pd.read_csv('resources/stockcode.csv', dtype = {"종목코드": str, "회사명": str}, encoding = "UTF-8")
     zzin_df = pd.read_csv('resources/{}.csv'.format(zzin_df), dtype = {"stock_code" :str}, parse_dates=['Date'], index_col=[0], encoding = "949")
+    P_score_sample = zzin_df["P_score"]
     stock_sample = zzin_df["stock_code"]
     date_sample = zzin_df["Date"]
     win_lose_table = pd.DataFrame({"Date" : [],"stock_name" : [],"today_big_win" : [], "today_small_win" : [], "today_lose" : [], 
                                     "tomorrow_big_win" : [], "tomorrow_small_win" : [], "tomorrow_lose" : [],
-                                    "day2_big_win" : [], "day2_small_win" : [], "day2_lose" : [], "real_profit" : [], "Nasdaq" : []})
+                                    "day2_big_win" : [], "day2_small_win" : [], "day2_lose" : [], "real_profit" : [], "Nasdaq" : [], "P_score" : []})
     #print(stock_sample)
     for i in range (len(stock_sample)) :
         stock_code = str(stock_sample.iloc[i])
+        P_score = P_score_sample.iloc[i]
         if len(stock_code) == 6:
             pass
         else : 
@@ -81,10 +83,11 @@ def win_lose_test(zzin_df = "zzin_df_item6", first_profit = 0.05, first_loss = 0
         "today_big_win" : [win_lose_score["today_big_win"]], "today_small_win" : [win_lose_score["today_small_win"]], "today_lose" : [win_lose_score["today_lose"]],
         "tomorrow_big_win" : [win_lose_score["tomorrow_big_win"]], "tomorrow_small_win" : [win_lose_score["tomorrow_small_win"]], "tomorrow_lose" : [win_lose_score["tomorrow_lose"]],
         "day2_big_win" : [win_lose_score["day2_big_win"]], "day2_small_win" : [win_lose_score["day2_small_win"]], "day2_lose" : [win_lose_score["day2_lose"]],
-        "real_profit" : [win_lose_score["real_profit"]], "Nasdaq" : [win_lose_score["Nasdaq"]]})
+        "real_profit" : [win_lose_score["real_profit"]], "Nasdaq" : [win_lose_score["Nasdaq"]], "P_score" : [P_score]})
         win_lose_table = win_lose_table.append(win_lose_score_df)
     print(win_lose_table)
-    win_lose_table.to_csv("resources/volume1m_smajung_winlose_table_10,4,7.5,3,5.csv", encoding = 'euc-kr') 
+    win_lose_table.to_csv("resources/wdhs_ver3/wdhs_ver3.4_winlose_table_10,4,7.5,3,5.csv", encoding = 'euc-kr') 
     return win_lose_table
 
-win_lose_test(zzin_df = "new_samjung_test_volume_1m", first_profit = 0.1, first_loss = 0.04, second_profit = 0.075, second_loss = 0.03,third_profit = 0.05)
+win_lose_test(zzin_df = "wdhs_ver3/wdhs_ver3.4_df", first_profit = 0.1, first_loss = 0.04, second_profit = 0.075, second_loss = 0.03,third_profit = 0.05)
+
