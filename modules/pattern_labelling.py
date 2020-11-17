@@ -14,29 +14,34 @@ def labellingD0(d0) -> str:
 
     # 장대 양봉
     if closeP >= 1.1*openP:
-        if closeP < highP:
+        if closeP < highP:  # 윗꼬리 있음
             if openP > lowP:
                 return "P15"
-            if highP - 2*closeP + openP >= 0:
+            elif (highP - closeP) >= 0.07*openP:
                 return "P14"
-            return "P13"
-        if openP > lowP:
+            else:
+                return "P13"
+        elif openP > lowP:  # 윗꼬리는 없는데 아랫꼬리는 있음
             return "P11"
-        return "P10"
+        else:
+            return "P10"    # 꼬리 없음
 
     # 짧은 양봉
     elif closeP >= 1.005*openP:
         if closeP < highP:
             if openP > lowP:
                 return "P05"
-            if highP - 3*closeP + 2*openP >= 0:
+            elif (highP - closeP) >= 0.07*openP:
                 return "P04"
-            return "P03"
-        if openP > lowP:
+            else:
+                return "P03"
+        elif openP > lowP:
             if 2*highP - 3*openP + lowP >= 0:
                 return "P01"
-            return "P02"
-        return "P00"
+            else:
+                return "P02"
+        else:
+            return "P00"
 
     # 보합
     elif closeP >= openP:
