@@ -68,10 +68,11 @@ def update_stockData_with_labels(start_date=None):
                                                         ignore_index=True)
                 last_idx = len(update_target)-1
                 update_target['pattern1'].values[last_idx] = labellingD0(update_target.iloc[last_idx])
+                update_target['new_pat1'].values[last_idx] = labellingD0_new(update_target.iloc[last_idx], update_target.close.values[last_idx-1])
 
                 temp = update_target.values[last_idx]
                 temp[0] = temp[0].date()
-                temp = "".join([str(last_idx), ","]+[str(temp[i//2]) if i % 2 == 0 else "," for i in range(13)])
+                temp = "".join([str(last_idx), ","]+[str(temp[i//2]) if i % 2 == 0 else "," for i in range(15)])
                 temp += '\n'
                 with open(filename, 'a', encoding='UTF-8') as f:
                     f.write(temp)
@@ -83,6 +84,7 @@ def update_stockData_with_labels(start_date=None):
                 update_target.close.values[target_idx] = stock_[5]
                 update_target.volume.values[target_idx] = stock_[6]
                 update_target.pattern1.values[target_idx] = labellingD0(update_target.iloc[target_idx])
+                update_target.new_pat1.values[target_idx] = labellingD0_new(update_target.iloc[target_idx], update_target.close.values[target_idx-1])
                 update_target.to_csv(filename)
 
 def cleanup_stockData():
@@ -96,6 +98,29 @@ def cleanup_stockData():
         except FileNotFoundError:
             continue        
         update_target = update_target[['date','open','high','low','close','volume','pattern1']]
+        update_target.to_csv(filename)
+
+def add_new_pat1():
+    '''
+    'new_pat1' column을 모든 데이터에 추가합니다.
+    '''
+    for stock_code in stock_list['종목코드'].iloc:
+        print(f'{stock_code}')
+        filename = f'resources/stock_market_data/{stock_code}.csv'
+        try:    
+            update_target = pd.read_csv(filename, parse_dates=['date'], index_col=[0])
+        except FileNotFoundError:
+            continue
+
+        try:
+            update_target.new_pat1.values[0]
+        except AttributeError:
+            update_target['new_pat1'] = None
+
+        for i in range(1,len(update_target)):
+            update_target.new_pat1.values[i] = labellingD0_new(update_target.iloc[i], update_target.close.values[i-1])
+        
+        update_target = update_target[['date','open','high','low','close','volume','pattern1','new_pat1']]
         update_target.to_csv(filename)
 # -------------------------------------------------------------------------------------------------------------
 # -------------------------------------------------------------------------------------------------------------
