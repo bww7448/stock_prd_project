@@ -63,6 +63,7 @@ def tripleScreenAnalysis(emaSpan, startDate = None, endDate = None, memo="", GWA
             #         continue
 
             if df.ema.values[i-1] < df.ema.values[i]:
+                
                 if df.fast_k.values[i] >= 20 and df.fast_k.values[i] < GWAMAESU and df.fast_k.values[i-1] < 20:
                     df_res = df_res.append({'날짜':df.date.values[i],'종목코드':stockcode,'회사명':stockname,'거래량':df.volume.values[i]},ignore_index=True)
 
