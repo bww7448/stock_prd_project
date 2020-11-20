@@ -1,7 +1,7 @@
 import pandas as pd
 import numpy as np
 
-def tripleScreenAnalysis(emaSpan, startDate = None, endDate = None, memo="", GWAMAEDO=70, VOLUME=500000):
+def tripleScreenAnalysis(emaSpan, startDate = None, endDate = None, memo="", GWAMAESU=80, VOLUME=500000):
 
     stock_list = pd.read_csv("resources/stockcode.csv",dtype = {"종목코드": str, "회사명": str}, index_col=[0])
     df_res = pd.DataFrame({"날짜":[],"종목코드":[],"회사명":[],'거래량':[]})
@@ -20,8 +20,6 @@ def tripleScreenAnalysis(emaSpan, startDate = None, endDate = None, memo="", GWA
         lastIdx = len(df) -1
         if df.open.values[lastIdx] == -1:
             df = df.drop([lastIdx])
-        if df.volume.values[-1] < VOLUME:
-            continue
         ema = df.close.ewm(span=emaSpan).mean()
         df = df.assign(ema=ema).dropna()
 
@@ -51,18 +49,12 @@ def tripleScreenAnalysis(emaSpan, startDate = None, endDate = None, memo="", GWA
             df = df.iloc[temp1-1:temp2+1]
 
         for i in range(1,len(df)):
-            if df.close.values[i] < 2000:
-                if df.volume.values[i] < 5000000:
-                    continue
-            elif df.close.values[i] < 50000:
-                if df.volume.values[i] < 1000000:
-                    continue
-            else:
-                if df.volume.values[i] < VOLUME:
-                    continue
+            if (df.close.values[i] + df.open.values[i] + df.high.values[i] + df.low.values[i])*df.volume.values[i] < 40000000000:
+                continue
 
             if df.ema.values[i-1] < df.ema.values[i]:
-                if df.fast_k.values[i] >= 20 and df.fast_k.values[i] < GWAMAEDO and df.fast_k.values[i-1] < 20:
+                
+                if df.fast_k.values[i] >= 20 and df.fast_k.values[i] < GWAMAESU and df.fast_k.values[i-1] < 20:
                     df_res = df_res.append({'날짜':df.date.values[i],'종목코드':stockcode,'회사명':stockname,'거래량':df.volume.values[i]},ignore_index=True)
 
     df_res = df_res.sort_values(by=['날짜'])

@@ -21,10 +21,11 @@ if __name__ == "__main__":
     # print("데이터 업데이트 완료 -> spent time: {}ms".format((endTime - startTime)*1000))
 
 
-    # startTime = time()
-    # tripleScreenAnalysis(60)
-    # endTime = time()
-    # print("분석 대상 종목 추출 완료 -> spent time: {}ms".format((endTime - startTime)*1000))
+    startTime = time()
+    tripleScreenAnalysis(60)
+    endTime = time()
+    print("분석 대상 종목 추출 완료 -> spent time: {}ms".format((endTime - startTime)*1000))
+
 
     samjung_test = samjung_stock_pred_new(day_weight=0.5, N_items=5)
     print(samjung_test)
