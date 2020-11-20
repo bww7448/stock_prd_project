@@ -257,36 +257,36 @@ def call_nasdaq():
     nsq_data = nsq_data[['date','nasdaq']]
     nsq_data.to_csv("resources/nasdaq.csv")
 
-# 데이터 modify용
-def check_labellingNASDAQ(stockCode=None):
-    if stockCode == None:
-        check_list = stock_list['종목코드'].iloc
-    elif type(stockCode) == str:
-        check_list = [stockCode]
-    elif type(stockCode) == list:
-        check_list = stockCode
-    else:
-        raise Exception("^~^")
+# # 데이터 modify용
+# def check_labellingNASDAQ(stockCode=None):
+#     if stockCode == None:
+#         check_list = stock_list['종목코드'].iloc
+#     elif type(stockCode) == str:
+#         check_list = [stockCode]
+#     elif type(stockCode) == list:
+#         check_list = stockCode
+#     else:
+#         raise Exception("^~^")
 
-    for stock_code in check_list:
-        filename = f'resources/stock_market_data/{stock_code}.csv'
-        try:    # 갱신 대상 데이터 불러오기
-            check_target = pd.read_csv(filename, parse_dates=['date'], index_col=[0])
-        except FileNotFoundError:
-            continue
+#     for stock_code in check_list:
+#         filename = f'resources/stock_market_data/{stock_code}.csv'
+#         try:    # 갱신 대상 데이터 불러오기
+#             check_target = pd.read_csv(filename, parse_dates=['date'], index_col=[0])
+#         except FileNotFoundError:
+#             continue
 
-        check_target = pd.merge(check_target[check_target.columns[0:9]], nsq_p, on='date', how='left')
-        nan_list = check_target[check_target['nasdaq'].isnull()].index
-        check_target['nasdaq'].fillna(-1)
+#         check_target = pd.merge(check_target[check_target.columns[0:9]], nsq_p, on='date', how='left')
+#         nan_list = check_target[check_target['nasdaq'].isnull()].index
+#         check_target['nasdaq'].fillna(-1)
 
-        # 해당 날짜에 나스닥 지수가 존재하지 않을 경우, 이전 날짜의 나스닥 지수를 적용합니다.
-        for i in nan_list:
-            pointer = i
-            while (pointer > 0):
-                pointer -= 1
-                temp = check_target['nasdaq'].values[pointer]
-                if temp != -1:
-                    check_target['nasdaq'].values[i] = temp
-                    break
+#         # 해당 날짜에 나스닥 지수가 존재하지 않을 경우, 이전 날짜의 나스닥 지수를 적용합니다.
+#         for i in nan_list:
+#             pointer = i
+#             while (pointer > 0):
+#                 pointer -= 1
+#                 temp = check_target['nasdaq'].values[pointer]
+#                 if temp != -1:
+#                     check_target['nasdaq'].values[i] = temp
+#                     break
 
-        check_target.to_csv(filename, encoding="UTF-8")
+#         check_target.to_csv(filename, encoding="UTF-8")

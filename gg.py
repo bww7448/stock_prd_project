@@ -1,8 +1,6 @@
-from modules.load_data import cleanup_stockData
+import pandas as pd
 from time import time
 
 
 if __name__ == "__main__":
-
-    cleanup_stockData()
-    
+    pass
