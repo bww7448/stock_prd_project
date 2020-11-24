@@ -31,6 +31,7 @@ def update_stockData_with_labels(start_date=None):
 
     pd_dateRange = pd.date_range(pd_startDate, pd_destDate)
 
+    sys_print("증시 데이터 로드를 시작합니다.\n")
     df_update_all = pd.DataFrame()
     for pd_date in pd_dateRange:
         # pd_date 날짜의 한국거래소 시장 데이터를 불러옵니다.
@@ -43,7 +44,7 @@ def update_stockData_with_labels(start_date=None):
         df_update['date'] = pd_date
         df_update_all = df_update_all.append(df_update)
         sys_print(f"{str(pd_date)} 의 증시 데이터를 로드했습니다.\n")     
-    sys_print("필요한 증시 데이터 로드 완료\n")
+    sys_print("필요한 증시 데이터 로드 완료했습니다.\n")
 
     for stock_code in stock_list['종목코드'].iloc:
         filename = f'resources/stock_market_data/{stock_code}.csv'
@@ -51,9 +52,12 @@ def update_stockData_with_labels(start_date=None):
             update_target = pd.read_csv(filename, parse_dates=['date'], index_col=[0])
         except FileNotFoundError:
             continue
-        
-        while pd_startDate <= update_target.date.iloc[-1]:
-            update_target = update_target.drop(len(update_target)-1)
+
+        try:
+            while pd_startDate <= update_target.date.iloc[-1]:
+                update_target = update_target.drop(len(update_target)-1)
+        except IndexError:
+            pass    # start_date보다 상장일이 더 최신
 
         start = len(update_target)
         update_obj = df_update_all[df_update_all['종목코드']==stock_code]
