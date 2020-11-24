@@ -10,7 +10,7 @@ from time import time
 if __name__ == "__main__":
 
     startTime = time()
-    update_stockData_with_labels()
+    update_stockData_with_labels(start_date='2020-10-30')
     endTime = time()
     print("데이터 업데이트 완료 -> spent time: {}ms".format((endTime - startTime)*1000))
 
