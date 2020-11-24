@@ -9,6 +9,7 @@ from modules.pattern_labelling import labellingD0
 stock_list = pd.read_csv("resources/stockcode.csv",
                          dtype={"종목코드": str})
 
+
 def update_stockData_with_labels(start_date=None):
     '''
     라벨링된 데이터에 최신 주식 데이터를 업데이트합니다.
@@ -19,13 +20,11 @@ def update_stockData_with_labels(start_date=None):
     pd_destDate = pd.to_datetime(pd.Timestamp.now() - pd.Timedelta(hours=15.5))
     pd_destDate = pd.to_datetime(pd_destDate.date())
 
-    with open('resources/stock_market_data/950200.csv', 'r') as file:
-        standard = file.readlines()
-    standard = standard[-1].split(",")
-    pd_lastSavedDate = pd.to_datetime(standard[1])
-
     if start_date is None:
-        pd_startDate = pd_lastSavedDate
+        with open('resources/stock_market_data/950200.csv', 'r') as file:
+            standard = file.readlines()
+        standard = standard[-2].split(",")  # 장이 마감되기 전에 갱신된 데이터를 다시 갱신합니다.
+        pd_startDate = pd.to_datetime(standard[1])
     else:
         pd_startDate = pd.to_datetime(start_date)
 
@@ -43,13 +42,14 @@ def update_stockData_with_labels(start_date=None):
         df_update = df_update.reset_index()
         df_update['date'] = pd_date
         df_update_all = df_update_all.append(df_update)
-        sys_print(f"{str(pd_date)} 의 증시 데이터를 로드했습니다.\n")     
+        sys_print(f"{str(pd_date)} 의 증시 데이터를 로드했습니다.\n")
     sys_print("필요한 증시 데이터 로드 완료했습니다.\n")
 
     for stock_code in stock_list['종목코드'].iloc:
         filename = f'resources/stock_market_data/{stock_code}.csv'
-        try:    
-            update_target = pd.read_csv(filename, parse_dates=['date'], index_col=[0])
+        try:
+            update_target = pd.read_csv(filename, parse_dates=[
+                                        'date'], index_col=[0])
         except FileNotFoundError:
             continue
 
@@ -60,23 +60,24 @@ def update_stockData_with_labels(start_date=None):
             pass    # start_date보다 상장일이 더 최신
 
         start = len(update_target)
-        update_obj = df_update_all[df_update_all['종목코드']==stock_code]
-        update_obj = update_obj[['date','시가','고가','저가','종가','거래량']]
+        update_obj = df_update_all[df_update_all['종목코드'] == stock_code]
+        update_obj = update_obj[['date', '시가', '고가', '저가', '종가', '거래량']]
         update_obj.columns = ['date', 'open', 'high', 'low', 'close', 'volume']
         update_target = update_target.append(update_obj)
         update_target = update_target.reset_index(drop=True)
 
-        for i in range(start,len(update_target)):
-            update_target.pattern1.values[i] = labellingD0(update_target.iloc[i])
-        
-        lastline = {'date':pd.to_datetime(pd_destDate + pd.Timedelta(days=1)),
-                    'open':-1,
-                    'high':-1,
-                    'low':-1,
-                    'close':-1,
-                    'volume':-1,
-                    'pattern1':"XXX"}
-        update_target = update_target.append(lastline,ignore_index=True)
+        for i in range(start, len(update_target)):
+            update_target.pattern1.values[i] = labellingD0(
+                update_target.iloc[i])
+
+        lastline = {'date': pd.to_datetime(pd_destDate + pd.Timedelta(days=1)),
+                    'open': -1,
+                    'high': -1,
+                    'low': -1,
+                    'close': -1,
+                    'volume': -1,
+                    'pattern1': "XXX"}
+        update_target = update_target.append(lastline, ignore_index=True)
         update_target.to_csv(filename)
         sys_print(f"{stock_code} 갱신 완료\n")
 
@@ -87,11 +88,13 @@ def cleanup_columns():
     '''
     for stock_code in stock_list['종목코드'].iloc:
         filename = f'resources/stock_market_data/{stock_code}.csv'
-        try:    
-            update_target = pd.read_csv(filename, parse_dates=['date'], index_col=[0])
+        try:
+            update_target = pd.read_csv(filename, parse_dates=[
+                                        'date'], index_col=[0])
         except FileNotFoundError:
-            continue        
-        update_target = update_target[['date','open','high','low','close','volume','pattern1']]
+            continue
+        update_target = update_target[[
+            'date', 'open', 'high', 'low', 'close', 'volume', 'pattern1']]
         update_target.to_csv(filename)
 
 
