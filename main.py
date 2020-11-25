@@ -3,24 +3,21 @@ from modules.triple_screen import tripleScreenAnalysis
 from modules.samjung_stock_pred_test import samjung_stock_pred
 from modules.warehouse import get_strDate
 
-from sklearn.metrics import confusion_matrix, classification_report
+# from sklearn.metrics import confusion_matrix, classification_report
 from time import time
 
 
 if __name__ == "__main__":
 
     startTime = time()
-    update_stockData_with_labels(start_date='2020-10-30')
+    update_stockData_with_labels()
     endTime = time()
     print("데이터 업데이트 완료 -> spent time: {}ms".format((endTime - startTime)*1000))
-
-
 
     startTime = time()
     tripleScreenAnalysis(60)
     endTime = time()
     print("분석 대상 종목 추출 완료 -> spent time: {}ms".format((endTime - startTime)*1000))
-
 
     samjung_test = samjung_stock_pred(day_weight=0.5, N_items=5)
     print(samjung_test)

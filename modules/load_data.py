@@ -17,7 +17,7 @@ def update_stockData_with_labels(start_date=None):
     # 15시 30분이 지나기 전까지는 증시 데이터는 전날까지만 로드합니다.
     sys_print = stdout.write    # stack print method
 
-    pd_destDate = pd.to_datetime(pd.Timestamp.now() - pd.Timedelta(hours=15.5))
+    pd_destDate = pd.to_datetime(pd.Timestamp.now() - pd.Timedelta(hours=15))
     pd_destDate = pd.to_datetime(pd_destDate.date())
 
     if start_date is None:
