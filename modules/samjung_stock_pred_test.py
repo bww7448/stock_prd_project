@@ -1,5 +1,5 @@
 import pandas as pd
-from sklearn.metrics import confusion_matrix, classification_report
+# from sklearn.metrics import confusion_matrix, classification_report
 
 def samjung_stock_pred(day_weight=0.5, N_items=5, memo=""):
     '''
@@ -102,5 +102,5 @@ if __name__ == "__main__":
     samjung_test = samjung_stock_pred(day_weight=0.5, N_items=5)
     print(samjung_test)
     samjung_test.to_csv("resources/RECOMMEND/1110_recommend.csv", encoding = "euc-kr")
-    print(confusion_matrix(samjung_test["predict"], samjung_test["real"]))
-    print(classification_report(samjung_test["predict"], samjung_test["real"]))
+    # print(confusion_matrix(samjung_test["predict"], samjung_test["real"]))
+    # print(classification_report(samjung_test["predict"], samjung_test["real"]))
