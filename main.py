@@ -1,4 +1,4 @@
-from modules.load_data import update_stockData_with_labels
+from modules.load_data import update_stockData_with_labels, update_valid_stocklist
 from modules.triple_screen import tripleScreenAnalysis
 from modules.samjung_stock_pred_test import samjung_stock_pred
 from modules.warehouse import get_strDate
@@ -13,6 +13,9 @@ if __name__ == "__main__":
     update_stockData_with_labels()
     endTime = time()
     print("데이터 업데이트 완료 -> spent time: {}ms".format((endTime - startTime)*1000))
+
+    # # TODO: 시점 결정을 자동으로
+    # update_valid_stocklist("20210402")
 
     startTime = time()
     tripleScreenAnalysis(60)

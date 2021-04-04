@@ -1,10 +1,14 @@
 import pandas as pd
-from pykrx.stock import get_market_ohlcv_by_ticker, get_market_ohlcv_by_date
+import numpy as np
+
+from pykrx.stock import get_market_ohlcv_by_ticker, get_market_ohlcv_by_date, get_market_ticker_list
+
 from random import random
 from time import sleep
 from sys import stdout
 
 from modules.pattern_labelling import labellingD0
+
 
 stock_list = pd.read_csv("resources/stockcode.csv",
                          dtype={"종목코드": str})
@@ -12,38 +16,46 @@ stock_list = pd.read_csv("resources/stockcode.csv",
 
 def update_stockData_with_labels(start_date=None):
     '''
-    라벨링된 데이터에 최신 주식 데이터를 업데이트합니다.
+    pykrx를 이용하여 증시 데이터를 업데이트합니다.
+    - start_date    갱신이 필요한 시점으로, 미입력 시 마지막으로 장 마감한 날짜부터 갱신됩니다.
+                    장 마감 이전에 업데이트했을 경우 마지막 날짜의 데이터는 실제와 다를 수 있습니다.
+                    형식은 'YYYYMMDD' 또는 Datetime
     '''
-    # 15시 30분이 지나기 전까지는 증시 데이터는 전날까지만 로드합니다.
     sys_print = stdout.write    # stack print method
 
-    pd_destDate = pd.to_datetime(pd.Timestamp.now() - pd.Timedelta(hours=15))
+    pd_destDate = pd.to_datetime(pd.Timestamp.now() - pd.Timedelta(hours=15.5)) # 15시 30분이 지나기 전까지는 증시 데이터는 전날까지만 로드
     pd_destDate = pd.to_datetime(pd_destDate.date())
 
     if start_date is None:
-        with open('resources/stock_market_data/950200.csv', 'r') as file:
+        # TODO: 상장된 종목 리스트 갱신, 충분한 양의 데이터가 쌓인 종목만 선별
+        with open('resources/stock_market_data/900140.csv', 'r') as file:
             standard = file.readlines()
-        standard = standard[-2].split(",")  # 장이 마감되기 전에 갱신된 데이터를 다시 갱신합니다.
+        standard = standard[-2].split(",")  # 장 마감 전 업데이트했을 가능성을 고려하여 어제를 갱신 대상에 포함시킴
         pd_startDate = pd.to_datetime(standard[1])
     else:
         pd_startDate = pd.to_datetime(start_date)
 
-    pd_dateRange = pd.date_range(pd_startDate, pd_destDate)
-
     sys_print("증시 데이터 로드를 시작합니다.\n")
+    pd_dateRange = pd.date_range(pd_startDate, pd_destDate)
     df_update_all = pd.DataFrame()
     for pd_date in pd_dateRange:
         # pd_date 날짜의 한국거래소 시장 데이터를 불러옵니다.
         df_update = get_market_ohlcv_by_ticker(pd_date)
-        sleep(1+2*random())
-        if not len(df_update) and pd_date != pd_destDate:
+        if df_update.거래량.sum() == 0:
             sys_print(f"{str(pd_date)} 에는 증시 데이터가 없습니다.\n")
             continue
         df_update = df_update.reset_index()
+        df_update = df_update[df_update.시가 > 0]   # 거래정지된 종목은 종가를 제외한 column이 0으로 채워짐
+
         df_update['date'] = pd_date
         df_update_all = df_update_all.append(df_update)
-        sys_print(f"{str(pd_date)} 의 증시 데이터를 로드했습니다.\n")
-    sys_print("필요한 증시 데이터 로드 완료했습니다.\n")
+
+        timeSleep = 1+2*random()    # 너무 많은 요청 시 IP block을 방지. 작업량이 적은 경우 0으로 설정하세요.
+        sys_print(f"{str(pd_date)} 의 증시 데이터를 로드했습니다 --- {timeSleep:.2f}초 대기\n")
+        sleep(timeSleep)
+
+    df_update_all.rename(columns={'티커':'종목코드'}, inplace=True) # TODO: 리소스 자체의 column명을 변경
+    sys_print("필요한 증시 데이터 로드 완료.\n")
 
     for stock_code in stock_list['종목코드'].iloc:
         filename = f'resources/stock_market_data/{stock_code}.csv'
@@ -81,6 +93,14 @@ def update_stockData_with_labels(start_date=None):
         update_target.to_csv(filename)
         sys_print(f"{stock_code} 갱신 완료\n")
 
+def update_valid_stocklist(date):
+    '''
+    date 기준으로 상장된 종목 리스트를 업데이트합니다.
+    '''
+    stockList = get_market_ticker_list(date)
+    stockList.sort()
+    stockList = np.array(stockList)
+    np.save("resources/stockList", stockList)
 
 def cleanup_columns():
     '''

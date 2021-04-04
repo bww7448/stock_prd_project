@@ -6,17 +6,16 @@ def tripleScreenAnalysis(emaSpan, startDate = None, endDate = None, memo="", GWA
     삼중창 매매 시스템의 기준 중 EMA와 stochastic(Fast-K) 지표를 활용합니다.
 
     '''
-    stock_list = pd.read_csv("resources/stockcode.csv",dtype = {"종목코드": str}, index_col=[0])
+    validStockList = np.load("resources/stockList.npy")
+    stockList = pd.read_csv("resources/stockcode.csv",dtype = {"종목코드": str}, index_col=[0])
     df_res = pd.DataFrame({"날짜":[],"종목코드":[],"회사명":[],'거래량':[]})
 
-
-    for idx in range(len(stock_list)):
-        stockcode = stock_list.iloc[idx]
+    for idx in range(len(stockList)):
+        stockcode = stockList.iloc[idx]
         stockname = stockcode.회사명
         stockcode = stockcode.종목코드
-
-        # if stockcode == "068760":
-            # print("????") # 종단점 찍고 디버깅할 용도의 코드
+        if stockcode not in validStockList:
+            continue
 
         df = pd.read_csv(f"resources/stock_market_data/{stockcode}.csv", parse_dates=['date'], index_col=[0])
         df = df[['date','open','high','low','close','volume']]
