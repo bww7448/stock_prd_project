@@ -8,4 +8,4 @@
 
 [정**](https://github.com/aok1000)
 
-<img src='resources/assets/all_slides.png'>
+<img src='resources/presentation/all_slides.png'>

@@ -1,7 +1,7 @@
 from modules.load_data import update_stockData_with_labels, update_valid_stocklist
 from modules.triple_screen import tripleScreenAnalysis
 from modules.samjung_stock_pred_test import samjung_stock_pred
-from modules.warehouse import get_strDate
+from modules.utiltools import get_strDate
 
 # from sklearn.metrics import confusion_matrix, classification_report
 from time import time
