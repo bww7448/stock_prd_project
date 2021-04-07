@@ -7,20 +7,23 @@ def get_strDate(daysDelta=None, dateFormat="YYMMDD"):
     if daysDelta is not None:
         date += pd.Timedelta(days=daysDelta)
 
+    date = str(date.date()) # YYYY-MM-DD
+
     if dateFormat == "YYYY-MM-DD":
-        return str(date.date())
+        return date
     elif dateFormat == "YY-MM-DD":
-        return str(date.date())[2:10]
-    elif dateFormat == "YYYYMMDD":
-        yyyymmdd = [date.year, date.month, date.day]
-        yyyymmdd = list(map(str,yyyymmdd))
-        return "".join(yyyymmdd)
+        return date[2:10]
+    elif dateFormat == "MM-DD":
+        return date[4:10]
+
+    date = date.replace('-','') # YYYYMMDD
+
+    if dateFormat == "YYYYMMDD":
+        return date
     elif dateFormat == "YYMMDD":
-        yymmdd = [date.year%100, date.month, date.day]
-        yymmdd = list(map(str,yymmdd))
-        return "".join(yymmdd)
+        return date[2:8]
     elif dateFormat == "MMDD":
-        mmdd = [date.month, date.day]
-        mmdd = list(map(str,mmdd))
-        return "".join(mmdd)
+        return date[4:8]
+    else:
+        raise Exception("utiltools.get_strDate의 dateFormat에 유효하지 않은 형식이 입력되었습니다.")
     
