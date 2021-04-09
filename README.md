@@ -1,3 +1,10 @@
+# Getting Started
+```
+pip install -r requirements.txt
+python main.py
+```
+\n
+\n
 # 패턴 분석을 통한 상승 종목 예측 프로젝트
 
 [백** 팀장](https://github.com/bww7448)
